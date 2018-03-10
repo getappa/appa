@@ -5,10 +5,14 @@ pub struct Command {
     pub command: String,
 }
 
-pub fn run(pe: Command, data: String) -> String {
+pub trait Runner {
+    fn run(&self, pe: Command) -> String {}
+}
+
+pub fn consume_task(pe: Command) -> String {
     let output = process::Command::new("sh")
                         .arg("-c")
-                        .arg(pe.get_command(data))
+                        .arg(pe.get_command())
                         .output()
                         .expect("failed");
 
@@ -16,12 +20,12 @@ pub fn run(pe: Command, data: String) -> String {
 }
 
 impl Command {
-    fn get_command(&self, data: String) -> String {
+    fn get_command(&self) -> String {
         format!(
             "{} {} {}",
             &self.command,
             &self.path,
-            data
+            &self.data
         )
     }
 }
