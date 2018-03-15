@@ -1,0 +1,25 @@
+tasks:
+  - name: 'py_1'
+    command: 'python'
+    path: 'tests/mocks/task1.py'
+  - name: 'py_2'
+    command: 'python'
+    path: 'tests/mocks/task2.py'
+
+  - name: 'collector_users'
+    command: 'python'
+    path: 'tests/mocks/collector1.py'
+  - name: 'collector_cars'
+    command: 'python'
+    path: 'tests/mocks/collector2.py'
+
+entities:
+  - name: 'user'
+    collector: 'collector_users'
+    tasks:
+      - py_1
+      - py_2
+  - name: 'cars'
+    collector: 'collector_cars'
+    tasks:
+      - py_1

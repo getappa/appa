@@ -6,3 +6,6 @@ authors = [
     "Guilherme Diego <guilherme.albino.francisco@gmail.com>",
     "Mateus Freira <mateus@tenfold.com>"
 ]
+
+[dependencies]
+yaml-rust = "0.4"
