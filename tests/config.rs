@@ -7,7 +7,8 @@ mod test {
     #[test]
     fn should_map_correctly_vectors() {
         let set = AppaConfig::new("tests/mocks/config1.yml".to_string());
-        assert_eq!("user".to_string(), set.entities[0].name);
-        // assert_eq!("2".to_string(), set.tasks);
+
+        assert_eq!(4, set.tasks.len());
+        assert_eq!(2, set.entities.len());
     }
 }

@@ -17,18 +17,23 @@ pub struct AppaConfig {
 
 fn generate_entities(yaml: &Yaml) -> Vec<AppaEntity> {
     let mut arr:Vec<AppaEntity> = Vec::new();
-    for item in yaml.as_vec() {
-        arr.push(AppaEntity::new(&item[0]));
+    let items = yaml.as_vec().unwrap();
+
+    for i in 0 .. items.len() {
+        arr.push(AppaEntity::new(&items[i]));
     }
     arr
 }
 
 fn generate_tasks(yaml: &Yaml) -> HashMap<String, AppaTask> {
-    let mut m:HashMap<String, AppaTask> = HashMap::new();
-    for item in yaml.as_vec() {
-        m[&item[0]["name"]] = AppaTask::new(&item[0]);
+    let mut hash:HashMap<String, AppaTask> = HashMap::new();
+    let items = yaml.as_vec().unwrap();
+
+    for i in 0 .. items.len() {
+        let key = items[i]["name"].as_str().unwrap().to_string();
+        hash.insert(key, AppaTask::new(&items[i]));
     }
-    m
+    hash
 }
 
 impl AppaConfig {
