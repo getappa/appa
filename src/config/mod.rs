@@ -1,15 +1,18 @@
 mod entity;
+mod tasks;
 
 use yaml_rust::{Yaml, YamlLoader};
 use std::fs::File;
 use std::io::prelude::*;
 use std::vec::Vec;
+use std::collections::HashMap;
 
 pub use self::entity::AppaEntity;
+pub use self::tasks::AppaTask;
 
 pub struct AppaConfig {
     pub entities: Vec<AppaEntity>,
-    pub tasks: String,
+    pub tasks: HashMap<String, AppaTask>,
 }
 
 fn generate_entities(yaml: &Yaml) -> Vec<AppaEntity> {
@@ -18,6 +21,14 @@ fn generate_entities(yaml: &Yaml) -> Vec<AppaEntity> {
         arr.push(AppaEntity::new(&item[0]));
     }
     arr
+}
+
+fn generate_tasks(yaml: &Yaml) -> HashMap<String, AppaTask> {
+    let mut m:HashMap<String, AppaTask> = HashMap::new();
+    for item in yaml.as_vec() {
+        m[&item[0]["name"]] = AppaTask::new(&item[0]);
+    }
+    m
 }
 
 impl AppaConfig {
@@ -31,7 +42,7 @@ impl AppaConfig {
 
         AppaConfig{
             entities: generate_entities(&doc["entities"]),
-            tasks: "2".to_string()
+            tasks: generate_tasks(&doc["tasks"])
         }
     }
 }
