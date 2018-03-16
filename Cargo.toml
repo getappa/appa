@@ -9,3 +9,5 @@ authors = [
 
 [dependencies]
 yaml-rust = "0.4"
+serde_json = "1.0"
+rayon = "1.0"

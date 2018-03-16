@@ -20,14 +20,11 @@ entities:
   - name: 'user'
     collector: 'collector_users'
     tasks:
-      - prop: count
-        task: py_1
-      - prop: some
-        task: py_2
-    reducers:
-      - py_3
-  - name: 'cars'
-    collector: 'collector_cars'
-    tasks:
-      - prop: count
-        task: py_3
+      py_1: count
+      # py_2: some
+    # reducers:
+    #   - py_3
+  # - name: 'cars'
+  #   collector: 'collector_cars'
+  #   tasks:
+  #     py_1: count
