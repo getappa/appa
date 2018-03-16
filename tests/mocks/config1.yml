@@ -5,6 +5,9 @@ tasks:
   - name: 'py_2'
     command: 'python'
     path: 'tests/mocks/task2.py'
+  - name: 'py_3'
+    command: 'python'
+    path: 'tests/mocks/task3.py'
 
   - name: 'collector_users'
     command: 'python'
@@ -17,9 +20,14 @@ entities:
   - name: 'user'
     collector: 'collector_users'
     tasks:
-      - py_1
-      - py_2
+      - prop: count
+        task: py_1
+      - prop: some
+        task: py_2
+    reducers:
+      - py_3
   - name: 'cars'
     collector: 'collector_cars'
     tasks:
-      - py_1
+      - prop: count
+        task: py_3
