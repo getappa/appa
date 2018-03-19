@@ -5,3 +5,4 @@ extern crate serde_json;
 
 pub mod config;
 pub mod queue;
+pub mod storage;

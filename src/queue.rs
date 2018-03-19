@@ -1,6 +1,7 @@
 use rayon::prelude::*;
-use serde_json::Value;
-use self::config::AppaConfig;
+use config::AppaConfig;
+use serde_json::{Value, from_str, to_string, Result};
+// use std::collections::HashMap;
 
 pub struct AppaQueue {
     config: AppaConfig
@@ -15,16 +16,21 @@ impl AppaQueue {
         let tasks = &self.config.tasks;
         &self.config.entities.par_iter()
             .for_each(|e| {
-                let data = tasks[e.collector]();
-                let json:Vec<Value> = serde_json::from_str(data);
-                let map_json:Vec<Value> = Vec::new();
+                let data = tasks.get(&e.collector).unwrap().exec("".to_string());
+                let json:Result<Value> = from_str(&data);
+                // let map_json:Vec<Value> = Vec::new();
 
-                json.par_iter().for_each(|d| {
-                    let output_d = clone(d);
-                    e.tasks.par_iter().for_each(|k, v| {
-                        output_d[v] = tasks[k](d)
-                        map_json.push(output_d)
+                json.ok().unwrap().as_array().unwrap().par_iter().for_each(|d| {
+                    let mut output_d = &d.as_object().unwrap();
+
+                    e.tasks.par_iter().for_each(|(k, v)| {
+                        let str_data = to_string(d).unwrap().as_str().to_string();
+                        output_d.insert(v.to_string(), Value::String(tasks.get(k).unwrap().exec(str_data)));
                     });
+                    // scoped_data.par_iter_mut().for_each(|(k, v)| {
+                    //     output_d[v] = tasks[k](d);
+                    //     map_json.push(output_d);
+                    // });
                 });
 
                 // e.reducers.iter().for_each(|k, v| {
@@ -32,6 +38,6 @@ impl AppaQueue {
                 //     save_on_puma(data);
                 // });
 
-            })
+            });
     }
 }

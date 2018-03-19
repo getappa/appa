@@ -1,22 +1,25 @@
 use yaml_rust::Yaml;
-use std::vec::Vec;
 use std::collections::HashMap;
 
 pub struct AppaEntity {
     pub name: String,
     pub collector: String,
-    pub tasks: Vec<HashMap<String, String>>,
+    pub tasks: HashMap<String, String>
+}
+
+fn convert_str(y: &Yaml) -> String {
+    y.as_str().unwrap().to_string()
 }
 
 fn convert_to_hashmap(y: &Yaml) -> HashMap<String, String> {
     let mut map:HashMap<String, String> = HashMap::new();
-    let v = y.as_vec().unwrap();
+    let v = y.as_hash().unwrap();
 
-    for val in 0 .. v.len() {
+    for (key, value) in v {
         map.insert(
-            val["prop"].as_str().unwrap().to_string(),
-            val["task"].as_str().unwrap().to_string()
-        )
+            key.as_str().unwrap().to_string(),
+            value.as_str().unwrap().to_string()
+        );
     }
 
     map
@@ -27,7 +30,7 @@ impl AppaEntity {
         AppaEntity{
             name: convert_str(&vals["name"]),
             collector: convert_str(&vals["collector"]),
-            tasks: vals["tasks"].as_vec().unwrap().iter().map(convert_to_hashmap).collect()
+            tasks: convert_to_hashmap(&vals["tasks"])
         }
     }
 }
