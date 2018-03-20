@@ -1,6 +1,7 @@
 use yaml_rust::Yaml;
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct AppaEntity {
     pub name: String,
     pub collector: String,

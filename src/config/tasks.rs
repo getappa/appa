@@ -1,6 +1,7 @@
 use yaml_rust::Yaml;
 use std::process::Command;
 
+#[derive(Clone)]
 pub struct AppaTask {
     pub command: String,
     pub path: String,

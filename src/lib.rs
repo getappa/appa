@@ -1,3 +1,5 @@
+extern crate rocksdb;
+extern crate uuid;
 extern crate yaml_rust;
 extern crate rayon;
 extern crate serde;

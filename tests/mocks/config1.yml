@@ -1,3 +1,4 @@
+storage_uri: 'tests/mocks/storage'
 tasks:
   - name: 'py_1'
     command: 'python'

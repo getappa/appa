@@ -10,9 +10,11 @@ use std::collections::HashMap;
 pub use self::entity::AppaEntity;
 pub use self::tasks::AppaTask;
 
+#[derive(Clone)]
 pub struct AppaConfig {
     pub entities: Vec<AppaEntity>,
     pub tasks: HashMap<String, AppaTask>,
+    pub storage_uri: String,
 }
 
 fn generate_entities(yaml: &Yaml) -> Vec<AppaEntity> {
@@ -47,7 +49,8 @@ impl AppaConfig {
 
         AppaConfig{
             entities: generate_entities(&doc["entities"]),
-            tasks: generate_tasks(&doc["tasks"])
+            tasks: generate_tasks(&doc["tasks"]),
+            storage_uri: doc["storage_uri"].as_str().unwrap().to_string()
         }
     }
 }

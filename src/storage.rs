@@ -1,17 +1,35 @@
 use rocksdb::DB;
+use uuid::Uuid;
+use serde_json::Value;
 
 pub struct RocksDbStorage {
+    pub base: String,
+}
+
+pub struct RockDbProject {
     pub conn: DB
 }
 
-impl Storage {
-    pub fn new(path: String) -> RocksDbStorage {
-        RocksDbStorage{
-            conn: DB::open_default(path).unwrap()
-        }
+impl RocksDbStorage {
+    pub fn new(base: String) -> RocksDbStorage {
+        RocksDbStorage{ base: base }
     }
 
-    pub fn add(&self, key: String, value: String) {
-        
+    pub fn project(&self, project: String) -> RockDbProject {
+        let p = format!("{}/{}", &self.base, project);
+        RockDbProject::new(DB::open_default(p).unwrap())
+    }
+}
+
+impl RockDbProject {
+    pub fn new(conn: DB) -> RockDbProject {
+        RockDbProject{conn: conn}
+    }
+
+    pub fn create(&self, json: Value) {
+        &self.conn.put(
+            Uuid::new_v4().as_bytes(),
+            json.as_str().unwrap().as_bytes()
+        );
     }
 }
