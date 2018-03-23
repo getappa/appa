@@ -1,6 +1,6 @@
 use rocksdb::DB;
 use uuid::Uuid;
-use serde_json::Value;
+use serde_json::{Value, to_string};
 
 pub struct RocksDbStorage {
     pub base: String,
@@ -29,7 +29,7 @@ impl RockDbProject {
     pub fn create(&self, json: Value) {
         &self.conn.put(
             Uuid::new_v4().as_bytes(),
-            json.as_str().unwrap().as_bytes()
+            to_string(&json).unwrap().as_str().as_bytes()
         );
     }
 }

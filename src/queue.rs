@@ -22,8 +22,9 @@ impl AppaQueue {
 
                 let data = tasks.get(&e.collector).unwrap().exec("".to_string());
                 let json:Result<Value> = from_str(&data);
-                let arr = json.ok().unwrap().as_array().unwrap();
-                arr.par_iter().for_each(|d| db.create(*d))
+                let done = json.ok().unwrap();
+                let arr = done.as_array().unwrap();
+                arr.par_iter().for_each(|d| db.create(d.clone()))
 
                     // db.create(d);
                     // let mut output_d = &d.as_object().unwrap();
