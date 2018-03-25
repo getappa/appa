@@ -1,6 +1,6 @@
 use rayon::prelude::*;
 use config::AppaConfig;
-use serde_json::{Value, from_str, Result};
+use serde_json::{Value, from_str, to_string, Result};
 use storage::RocksDbStorage;
 
 pub struct AppaQueue {
@@ -24,26 +24,17 @@ impl AppaQueue {
                 let json:Result<Value> = from_str(&data);
                 let done = json.ok().unwrap();
                 let arr = done.as_array().unwrap();
-                arr.par_iter().for_each(|d| db.create(d.clone()))
+                arr.par_iter().for_each(|d| {
+                    let key = db.create(d.clone());
+                    let str_data = to_string(d).unwrap().as_str().to_string();
 
-                    // db.create(d);
-                    // let mut output_d = &d.as_object().unwrap();
-
-                    // e.tasks.par_iter().for_each(|(k, v)| {
-                    //     let str_data = to_string(d).unwrap().as_str().to_string();
-                    //     output_d.insert(v.to_string(), Value::String(tasks.get(k).unwrap().exec(str_data)));
-                    // });
-                    // scoped_data.par_iter_mut().for_each(|(k, v)| {
-                    //     output_d[v] = tasks[k](d);
-                    //     map_json.push(output_d);
-                    // });
-                // });
-
-                // e.reducers.iter().for_each(|k, v| {
-                //     data[k] = tasks[v](data);
-                //     save_on_puma(data);
-                // });
-
+                    e.tasks.par_iter().for_each(|(k, v)| {
+                        db.update_json(
+                            key, v.clone(),
+                            tasks.get(k).unwrap().exec(str_data.clone())
+                        );
+                    });
+                });
             });
     }
 }
