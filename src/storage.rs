@@ -26,10 +26,31 @@ impl RockDbProject {
         RockDbProject{conn: conn}
     }
 
-    pub fn create(&self, json: Value) {
+    pub fn create(&self, json: Value) -> [u8; 16] {
+        let uid = Uuid::new_v4().as_bytes();
+        &self.put(*uid, json);
+
+        uid.clone()
+    }
+
+    pub fn put(&self, uid: [u8; 16], json: Value) {
         &self.conn.put(
-            Uuid::new_v4().as_bytes(),
+            &uid,
             to_string(&json).unwrap().as_str().as_bytes()
         );
+    }
+    pub fn get(&self, key: [u8; 16]) -> Value {
+        let resp_oks = self.conn.get(&key).ok().unwrap().unwrap();
+        let resp_bts = resp_oks.to_utf8().unwrap();
+        Value::from(resp_bts)
+    }
+
+    pub fn update_json(&self, key: [u8; 16], prop: String, value: String) {
+        let json_map = self.get(key).as_object();
+        let json = json_map.unwrap();
+        json.insert(prop, Value::from(value));
+
+        let new_value = Value::from(json.clone());
+        &self.put(key, new_value);
     }
 }
