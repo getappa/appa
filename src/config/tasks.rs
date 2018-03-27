@@ -31,7 +31,7 @@ impl AppaTask {
 
     fn get_command(&self, data: String) -> String {
         format!(
-            "{} {} {}",
+            "{} {} '{}'",
             &self.command,
             &self.path,
             data

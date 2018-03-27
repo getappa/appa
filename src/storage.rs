@@ -27,10 +27,10 @@ impl RockDbProject {
     }
 
     pub fn create(&self, json: Value) -> [u8; 16] {
-        let uid = Uuid::new_v4().as_bytes();
-        &self.put(*uid, json);
+        let uid = Uuid::new_v4();
+        &self.put(*uid.as_bytes(), json);
 
-        uid.clone()
+        uid.as_bytes().clone()
     }
 
     pub fn put(&self, uid: [u8; 16], json: Value) {
@@ -46,11 +46,13 @@ impl RockDbProject {
     }
 
     pub fn update_json(&self, key: [u8; 16], prop: String, value: String) {
-        let json_map = self.get(key).as_object();
-        let json = json_map.unwrap();
+        let json_map = self.get(key);
+        let json_ref = json_map.as_object().unwrap();
+        let mut json = json_ref.clone();
+
         json.insert(prop, Value::from(value));
 
-        let new_value = Value::from(json.clone());
+        let new_value = Value::from(json);
         &self.put(key, new_value);
     }
 }

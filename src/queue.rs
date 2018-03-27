@@ -25,12 +25,13 @@ impl AppaQueue {
                 let done = json.ok().unwrap();
                 let arr = done.as_array().unwrap();
                 arr.par_iter().for_each(|d| {
+                    // db.create(d.clone());
                     let key = db.create(d.clone());
                     let str_data = to_string(d).unwrap().as_str().to_string();
 
                     e.tasks.par_iter().for_each(|(k, v)| {
                         db.update_json(
-                            key, v.clone(),
+                            key.clone(), v.clone(),
                             tasks.get(k).unwrap().exec(str_data.clone())
                         );
                     });
