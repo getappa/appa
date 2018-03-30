@@ -1,6 +1,6 @@
 use rocksdb::DB;
 use uuid::Uuid;
-use serde_json::{Value, to_string};
+use serde_json::{Value, to_string, from_str};
 
 pub struct RocksDbStorage {
     pub base: String,
@@ -42,14 +42,17 @@ impl RockDbProject {
     pub fn get(&self, key: [u8; 16]) -> Value {
         let resp_oks = self.conn.get(&key).ok().unwrap().unwrap();
         let resp_bts = resp_oks.to_utf8().unwrap();
-        Value::from(resp_bts)
+        from_str(resp_bts).ok().unwrap()
     }
 
     pub fn update_json(&self, key: [u8; 16], prop: String, value: String) {
         let json_map = self.get(key);
-        let json_ref = json_map.as_object().unwrap();
+        let json_obj = json_map.as_object();
+        let json_ref = json_obj.unwrap();
+
         let mut json = json_ref.clone();
 
+        println!("{} {} {:?}", prop, value, json);
         json.insert(prop, Value::from(value));
 
         let new_value = Value::from(json);
