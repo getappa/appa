@@ -25,7 +25,9 @@ entities:
   #     py_2: some
   #   reducers:
   #     - py_3
-  # - name: 'cars'
-  #   collector: 'collector_cars'
-  #   tasks:
-  #     py_1: count
+  - name: 'cars'
+    collector: 'collector_cars'
+    stream: true
+    id_prop: 'id'
+    tasks:
+      py_1: count

@@ -1,7 +1,23 @@
 import sys
 import json
 
-user = json.loads(sys.argv[1])
-user["count"] = len(user["name"]) + user["age"]
+class AppaCommand():
+    def __init__(self):
+        self.data = json.loads(sys.argv[1])
 
-sys.stdout.write(json.dumps(user))
+    def send(self, val):
+        sys.stdout.write("{}".format(val))
+
+    @staticmethod
+    def run(command):
+        c = command()
+        val = c.get_val()
+        c.send(val)
+
+
+
+class Task(AppaCommand):
+    def get_val(self):
+        return len(self.data["name"]) + self.data["age"]
+
+AppaCommand.run(Task)

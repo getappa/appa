@@ -1,5 +1,4 @@
 use rocksdb::DB;
-use uuid::Uuid;
 use serde_json::{Value, to_string, from_str};
 
 pub struct RocksDbStorage {
@@ -26,36 +25,30 @@ impl RockDbProject {
         RockDbProject{conn: conn}
     }
 
-    pub fn create(&self, json: Value) -> [u8; 16] {
-        let uid = Uuid::new_v4();
-        &self.put(*uid.as_bytes(), json);
 
-        uid.as_bytes().clone()
-    }
-
-    pub fn put(&self, uid: [u8; 16], json: Value) {
+    pub fn put(&self, uid: &[u8], json: Value) {
         &self.conn.put(
-            &uid,
+            uid,
             to_string(&json).unwrap().as_str().as_bytes()
         );
     }
-    pub fn get(&self, key: [u8; 16]) -> Value {
+
+    pub fn get(&self, key: &[u8]) -> Value {
         let resp_oks = self.conn.get(&key).ok().unwrap().unwrap();
         let resp_bts = resp_oks.to_utf8().unwrap();
         from_str(resp_bts).ok().unwrap()
     }
 
-    pub fn update_json(&self, key: [u8; 16], prop: String, value: String) {
+    pub fn update_json(&self, key: &[u8], prop: String, value: String) {
         let json_map = self.get(key);
         let json_obj = json_map.as_object();
         let json_ref = json_obj.unwrap();
 
         let mut json = json_ref.clone();
 
-        println!("{} {} {:?}", prop, value, json);
         json.insert(prop, Value::from(value));
 
         let new_value = Value::from(json);
-        &self.put(key, new_value);
+        &self.put(&key, new_value);
     }
 }
