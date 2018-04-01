@@ -6,9 +6,6 @@ tasks:
   - name: 'py_2'
     command: 'python'
     path: 'tests/mocks/task2.py'
-  - name: 'py_3'
-    command: 'python'
-    path: 'tests/mocks/task3.py'
 
   - name: 'collector_users'
     command: 'python'
@@ -18,13 +15,12 @@ tasks:
     path: 'tests/mocks/collector2.py'
 
 entities:
-  - name: 'user'
+  - name: 'users'
     collector: 'collector_users'
+    pre:
+      - py_2
     tasks:
       py_1: count
-  #     py_2: some
-  #   reducers:
-  #     - py_3
   - name: 'cars'
     collector: 'collector_cars'
     stream: true

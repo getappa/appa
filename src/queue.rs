@@ -48,6 +48,13 @@ impl AppaQueue {
                     db.put(key.clone(), d.clone());
                     let str_data = to_string(d).unwrap().as_str().to_string();
 
+                    e.pre.iter().for_each(|v| {
+                        db.put_string(
+                            key.clone(),
+                            tasks.get(v).unwrap().exec(str_data.clone())
+                        );
+                    });
+
                     e.tasks.par_iter().for_each(|(k, v)| {
                         db.update_json(
                             key.clone(), v.clone(),

@@ -33,6 +33,13 @@ impl RockDbProject {
         );
     }
 
+    pub fn put_string(&self, uid: &[u8], json: String) {
+        &self.conn.put(
+            uid,
+            json.as_bytes()
+        );
+    }
+
     pub fn get(&self, key: &[u8]) -> Value {
         let resp_oks = self.conn.get(&key).ok().unwrap().unwrap();
         let resp_bts = resp_oks.to_utf8().unwrap();
