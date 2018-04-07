@@ -1,10 +1,8 @@
-extern crate rocksdb;
-extern crate uuid;
-extern crate yaml_rust;
-extern crate rayon;
-extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+
+extern crate serde_yaml;
 extern crate serde_json;
 
+pub mod core;
 pub mod config;
-pub mod queue;
-pub mod storage;

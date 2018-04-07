@@ -1,5 +1,6 @@
 storage_uri: 'tests/mocks/storage'
 tasks:
+  # General Tasks
   - name: 'py_1'
     command: 'python'
     path: 'tests/mocks/task1.py'
@@ -7,23 +8,21 @@ tasks:
     command: 'python'
     path: 'tests/mocks/task2.py'
 
+  # Collector Tasks
   - name: 'collector_users'
     command: 'python'
     path: 'tests/mocks/collector1.py'
-  - name: 'collector_cars'
+  - name: 'collector_mult'
     command: 'python'
     path: 'tests/mocks/collector2.py'
 
-entities:
+processors:
   - name: 'users'
-    collector: 'collector_users'
-    pre:
-      - py_2
-    tasks:
-      py_1: count
-  - name: 'cars'
-    collector: 'collector_cars'
-    stream: true
-    id_prop: 'id'
-    tasks:
+    collector_tasks:
+      # collector_users: _
+      collector_mult: user
+    sync_tasks:
+      py_2: esc
+      py_3: esc_2
+    async_tasks:
       py_1: count
