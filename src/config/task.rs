@@ -1,5 +1,6 @@
 use std::process::Command;
 
+#[derive(Clone)]
 pub struct Task {
     command: String,
     path: String
