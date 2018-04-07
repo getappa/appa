@@ -11,9 +11,9 @@ use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize)]
 pub struct ConfigurationFile {
-    storage_uri: String,
+    pub storage_uri: String,
+    pub processors: Vec<ProcessorEntity>,
     tasks: Vec<HashMap<String, String>>,
-    processors: Vec<ProcessorEntity>
 }
 
 impl ConfigurationFile {
@@ -30,14 +30,14 @@ impl ConfigurationFile {
 
     pub fn tasks_as_map(&self) -> HashMap<String, Task> {
         let mut map:HashMap<String, Task> = HashMap::new();
-        self.tasks.for_each(|t| {
+        self.tasks.iter().for_each(|t| {
             map.insert(
-                t["name"],
+                t["name"].clone(),
                 Task::new(
-                    t["command"],
-                    t["path"]
+                    &t["command"],
+                    &t["path"]
                 )
-            )
+            );
         });
 
         map
