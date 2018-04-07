@@ -5,9 +5,9 @@ use itertools::Itertools;
 use super::Task;
 
 #[derive(Clone)]
-struct Entry {
-    tag: String,
-    pentity: ProcessorEntity
+pub struct Entry {
+    pub tag: String,
+    pub pentity: ProcessorEntity
 }
 
 struct EntryIterator {
@@ -15,9 +15,9 @@ struct EntryIterator {
     entry: Entry,
 }
 
-struct Collector {
-    task: Task,
-    entries: Vec<Entry>
+pub struct Collector {
+    pub task: Task,
+    pub entries: Vec<Entry>
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -29,7 +29,7 @@ pub struct ProcessorEntity {
 }
 
 pub struct ProcessorHub {
-    collectors: Vec<Collector>,
+    pub collectors: Vec<Collector>,
 }
 
 impl ProcessorHub {
@@ -63,19 +63,5 @@ impl ProcessorHub {
         };
 
         ProcessorHub { collectors: collectors }
-    }
-
-    pub fn consume(&self) {
-        // self.collectors.par_iter(|task| {
-        //     let cmd = task.get_cmd();
-        //     consume::run(cmd, "", |d| {
-        //         let collector = self.processors[task.name];
-        //         collector.entries.par_iter().for_each(|(k, p)| {
-        //             p.exec_lifecycle(d);
-        //         })
-        //     }, |e| {
-        //         println!("{:?}", e);
-        //     });
-        // });
     }
 }

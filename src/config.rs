@@ -1,8 +1,5 @@
-mod task;
-mod processor;
-
-pub use self::task::Task;
-pub use self::processor::{ProcessorHub, ProcessorEntity};
+pub use super::task::Task;
+pub use super::processor::{ProcessorHub, ProcessorEntity};
 
 use serde_yaml;
 use std::fs::File;
