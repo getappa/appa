@@ -1,5 +1,9 @@
 use std::process::{Command, Stdio};
 use std::io::{BufRead, BufReader, Error};
+use std::vec::Vec;
+use rayon::prelude::*;
+
+use super::processor::Entry;
 
 pub fn exec<F1, F2>(mut c: Command, success: F1, fail: F2)
 where F1: Fn(String), F2: Fn(Error) {
@@ -25,4 +29,11 @@ where F1: Fn(String), F2: Fn(Error) {
             Err(e) => println!("error attempting to wait: {}", e),
         }
     }
+}
+
+pub fn entries(entries: Vec<Entry>, d: &str) {
+    println!("{}", d);
+    entries.par_iter().for_each(|e| {
+        println!("{:?}", e.tag);
+    });
 }

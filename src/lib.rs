@@ -10,8 +10,10 @@ pub mod config;
 pub mod processor;
 pub mod task;
 pub mod consumer;
+pub mod error;
 // pub mod storage;
 
 pub use self::task::Task;
 pub use self::processor::ProcessorHub;
 pub use self::config::ConfigurationFile;
+pub use self::error::error_handler;
