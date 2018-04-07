@@ -6,8 +6,7 @@ use appa::config::{ConfigurationFile, ProcessorHub};
 fn main () {
     let config = ConfigurationFile::new("tests/mocks/config1.yml");
     let tasks = config.tasks_as_map();
-    let hub = ProcessorHub::new();
+    let hub = ProcessorHub::new(config.processors, tasks);
 
-    hub.setup(config.processors, tasks);
-    // processor.start();
+    // hub.consume();
 }

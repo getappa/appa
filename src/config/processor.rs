@@ -1,13 +1,23 @@
 use std::vec::Vec;
 use std::collections::HashMap;
-use rayon::prelude::*;
-// use rayon::par_iter::ParallelIterator;
+use itertools::Itertools;
 
 use super::Task;
 
+#[derive(Clone)]
+struct Entry {
+    tag: String,
+    pentity: ProcessorEntity
+}
+
+struct EntryIterator {
+    on: String,
+    entry: Entry,
+}
+
 struct Collector {
     task: Task,
-    entries: HashMap<String, ProcessorEntity>
+    entries: Vec<Entry>
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -19,44 +29,53 @@ pub struct ProcessorEntity {
 }
 
 pub struct ProcessorHub {
-    collectors: Vec<Task>,
-    processors: HashMap<String, Collector>
+    collectors: Vec<Collector>,
 }
 
 impl ProcessorHub {
-    pub fn new() -> ProcessorHub {
-        ProcessorHub {
-            collectors: Vec::new(),
-            processors: HashMap::new()
+    pub fn new(processors: Vec<ProcessorEntity>, tasks: HashMap<String, Task>) -> ProcessorHub {
+        let mut c_entries:Vec<EntryIterator>= Vec::new();
+
+        for p in processors {
+            let ctasks = p.collector_tasks.clone();
+            for (collector_name, tag) in ctasks {
+                c_entries.push(EntryIterator{
+                    on: collector_name,
+                    entry: Entry {
+                        tag: tag,
+                        pentity: p.clone()
+                    }
+                });
+            }
         }
-    }
 
-    pub fn setup(
-        &mut self, processors: Vec<ProcessorEntity>, tasks: HashMap<String, Task>
-    ) {
-        self.collectors = tasks.iter().map(|(_, task)| task.clone()).collect();
+        let mut collectors: Vec<Collector> = Vec::new();
+        for (cname, eiters) in &c_entries.iter().group_by(|e| e.on.clone()) {
+            let mut entries:Vec<Entry> = Vec::new();
+            for ei in eiters {
+                entries.push(ei.entry.clone())
+            }
 
-        processors.into_iter().for_each(|p| {
-            p.collector_tasks.par_iter().for_each(|(col_name, recept_prop)| {
-                let rp = recept_prop.clone();
-                let pro = p.clone();
-
-                if self.processors.contains_key(col_name) {
-                    self.processors[col_name].entries.insert(rp, pro);
-                } else {
-                    let mut entries:HashMap<String, ProcessorEntity> = HashMap::new();
-                    entries.insert(rp, pro);
-
-                    self.processors.insert(col_name.clone(), Collector{
-                        task: tasks[col_name].clone(),
-                        entries: entries
-                    });
-                }
+            collectors.push(Collector {
+                task: tasks[&cname].clone(),
+                entries: entries
             });
-        });
+        };
+
+        ProcessorHub { collectors: collectors }
     }
 
-    pub fn start(&self) {
-
+    pub fn consume(&self) {
+        // self.collectors.par_iter(|task| {
+        //     let cmd = task.get_cmd();
+        //     consume::run(cmd, "", |d| {
+        //         let collector = self.processors[task.name];
+        //         collector.entries.par_iter().for_each(|(k, p)| {
+        //             p.exec_lifecycle(d);
+        //         })
+        //     }, |e| {
+        //         println!("{:?}", e);
+        //     });
+        // });
     }
 }
