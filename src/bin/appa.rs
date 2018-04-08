@@ -6,13 +6,13 @@ use appa::{
     consumer,
     error_handler,
     ConfigurationFile,
-    ProcessorHub
+    Hub
 };
 
 fn main () {
     let config = ConfigurationFile::new("tests/mocks/config1.yml");
     let tasks = config.tasks_as_map();
-    let hub = ProcessorHub::new(config.processors, tasks);
+    let hub = Hub::new(config.processors, tasks);
 
     hub.collectors.par_iter().for_each(|collector| {
         let command = collector.task.get_cmd("");

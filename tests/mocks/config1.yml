@@ -23,6 +23,6 @@ processors:
       collector_mult: user
     sync_tasks:
       py_2: esc
-      py_3: esc_2
+      # py_3: esc_2
     async_tasks:
       py_1: count

@@ -1,7 +1,6 @@
 use std::vec::Vec;
 use std::collections::HashMap;
-use itertools::Itertools;
-use std::io::prelude::*;
+use rayon::prelude::*;
 
 use super::Task;
 
@@ -11,58 +10,62 @@ pub struct Entry {
     pub pentity: ProcessorEntity
 }
 
-struct EntryIterator {
-    on: String,
-    entry: Entry,
-}
-
 pub struct Collector {
     pub task: Task,
     pub entries: Vec<Entry>
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct ProcessorEntity {
+pub struct ProcessorEntityFromYaml {
     pub name: String,
     pub collector_tasks: HashMap<String, String>,
-    pub sync_tasks: HashMap<String, String>,
-    pub async_tasks: HashMap<String, String>
+    sync_tasks: HashMap<String, String>,
+    async_tasks: HashMap<String, String>
 }
 
-pub struct ProcessorHub {
-    pub collectors: Vec<Collector>,
-}
+impl ProcessorEntityFromYaml {
+    pub fn convert_to_true_entity(&self, tasks: HashMap<String, Task>) -> ProcessorEntity {
+        let mut sync_tasks:HashMap<String, Task> = HashMap::new();
+        let mut async_tasks:HashMap<String, Task> = HashMap::new();
 
-impl ProcessorHub {
-    pub fn new(processors: Vec<ProcessorEntity>, tasks: HashMap<String, Task>) -> ProcessorHub {
-        let mut c_entries:Vec<EntryIterator>= Vec::new();
-
-        for p in processors {
-            let ctasks = p.collector_tasks.clone();
-            for (collector_name, tag) in ctasks {
-                c_entries.push(EntryIterator{
-                    on: collector_name,
-                    entry: Entry {
-                        tag: tag,
-                        pentity: p.clone()
-                    }
-                });
-            }
+        for (tname, prop) in self.sync_tasks.clone() {
+            sync_tasks.insert(prop, tasks[&tname].clone());
         }
 
-        let mut collectors: Vec<Collector> = Vec::new();
-        for (cname, eiters) in &c_entries.iter().group_by(|e| e.on.clone()) {
-            let mut entries:Vec<Entry> = Vec::new();
-            for ei in eiters {
-                entries.push(ei.entry.clone())
-            }
+        for (tname, prop) in self.async_tasks.clone() {
+            async_tasks.insert(prop, tasks[&tname].clone());
+        }
 
-            collectors.push(Collector {
-                task: tasks[&cname].clone(),
-                entries: entries
-            });
-        };
+        ProcessorEntity {
+            name: self.name.clone(),
+            sync_tasks: sync_tasks,
+            async_tasks: async_tasks,
+        }
+    }
+}
 
-        ProcessorHub { collectors: collectors }
+#[derive(Clone)]
+pub struct ProcessorEntity {
+    pub name: String,
+    sync_tasks: HashMap<String, Task>,
+    async_tasks: HashMap<String, Task>
+}
+
+impl ProcessorEntity {
+    pub fn process(&self, data: &str) {
+        println!("-- Start '{}' Process --", self.name);
+        println!("{}", data);
+
+        self.sync_tasks.iter().for_each(|(prop, task)| {
+            println!("{} {:?}", prop, task.to_string());
+        });
+
+        self.async_tasks.par_iter().for_each(|(prop, task)| {
+            println!("{} {:?}", prop, task.to_string());
+        });
+
+        // self.reduce.iter().for_each(|task| {
+
+        // })
     }
 }

@@ -1,5 +1,5 @@
 pub use super::task::Task;
-pub use super::processor::{ProcessorHub, ProcessorEntity};
+pub use super::processor::ProcessorEntityFromYaml;
 
 use serde_yaml;
 use std::fs::File;
@@ -9,7 +9,7 @@ use std::collections::HashMap;
 #[derive(Serialize, Deserialize)]
 pub struct ConfigurationFile {
     pub storage_uri: String,
-    pub processors: Vec<ProcessorEntity>,
+    pub processors: Vec<ProcessorEntityFromYaml>,
     tasks: Vec<HashMap<String, String>>,
 }
 

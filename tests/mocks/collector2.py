@@ -10,6 +10,6 @@ data = [
 
 for v in data:
     json_str = json.dumps([v])
-    sys.stdout.write("{}\n".format(json_str))
+    sys.stdout.write("!AppaTag(user){}\n".format(json_str))
     sys.stdout.flush()
     sleep(1)
