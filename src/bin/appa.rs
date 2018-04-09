@@ -11,8 +11,7 @@ use appa::{
 
 fn main () {
     let config = ConfigurationFile::new("tests/mocks/config1.yml");
-    let tasks = config.tasks_as_map();
-    let hub = Hub::new(config.processors, tasks);
+    let hub = Hub::new(config);
 
     hub.collectors.par_iter().for_each(|collector| {
         let command = collector.task.get_cmd("");

@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use rayon::prelude::*;
 
 use super::Task;
+use super::storage::RockDbProject;
 
 #[derive(Clone)]
 pub struct Entry {
@@ -24,7 +25,7 @@ pub struct ProcessorEntityFromYaml {
 }
 
 impl ProcessorEntityFromYaml {
-    pub fn convert_to_true_entity(&self, tasks: HashMap<String, Task>) -> ProcessorEntity {
+    pub fn convert_to_true_entity(&self, tasks: HashMap<String, Task>, p: RockDbProject) -> ProcessorEntity {
         let mut sync_tasks:HashMap<String, Task> = HashMap::new();
         let mut async_tasks:HashMap<String, Task> = HashMap::new();
 
@@ -38,6 +39,7 @@ impl ProcessorEntityFromYaml {
 
         ProcessorEntity {
             name: self.name.clone(),
+            storage: p,
             sync_tasks: sync_tasks,
             async_tasks: async_tasks,
         }
@@ -47,25 +49,28 @@ impl ProcessorEntityFromYaml {
 #[derive(Clone)]
 pub struct ProcessorEntity {
     pub name: String,
+    storage: RockDbProject,
     sync_tasks: HashMap<String, Task>,
     async_tasks: HashMap<String, Task>
 }
 
 impl ProcessorEntity {
-    pub fn process(&self, data: &str) {
-        println!("-- Start '{}' Process --", self.name);
-        println!("{}", data);
+    pub fn set_storage(&self) {
 
+    }
+
+    pub fn process(&self, data: &str) {
         self.sync_tasks.iter().for_each(|(prop, task)| {
-            println!("{} {:?}", prop, task.to_string());
+
         });
 
         self.async_tasks.par_iter().for_each(|(prop, task)| {
-            println!("{} {:?}", prop, task.to_string());
+
         });
-
-        // self.reduce.iter().for_each(|task| {
-
-        // })
     }
+
+    // A method to reduce the hole database
+    //self.reduce.iter().for_each(|task| {
+        // @TODO: Script reduce ALL data in
+    // })
 }

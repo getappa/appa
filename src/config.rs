@@ -1,5 +1,5 @@
-pub use super::task::Task;
-pub use super::processor::ProcessorEntityFromYaml;
+use super::Task;
+use super::processor::ProcessorEntityFromYaml;
 
 use serde_yaml;
 use std::fs::File;
