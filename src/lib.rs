@@ -15,7 +15,7 @@ pub mod error;
 pub mod hub;
 pub mod storage;
 
-pub use self::storage::{RocksDbStorage, RockDbProject};
+pub use self::storage::{RocksDbStorage, RocksDbProject};
 pub use self::task::Task;
 pub use self::hub::Hub;
 pub use self::config::ConfigurationFile;

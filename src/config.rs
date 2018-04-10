@@ -25,16 +25,13 @@ impl ConfigurationFile {
         ac
     }
 
-    pub fn tasks_as_map(&self) -> HashMap<String, Task> {
-        let mut map:HashMap<String, Task> = HashMap::new();
+    pub fn tasks_as_map(&self) -> HashMap<String, &'static Task> {
+        let mut map:HashMap<String, &'static Task>
+            = HashMap::new();
+
         self.tasks.iter().for_each(|t| {
-            map.insert(
-                t["name"].clone(),
-                Task::new(
-                    &t["command"],
-                    &t["path"]
-                )
-            );
+            let task = Task::new(&t["command"], &t["path"]);
+            map.insert(t["name"].clone(), &task);
         });
 
         map

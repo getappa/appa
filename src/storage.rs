@@ -5,8 +5,7 @@ pub struct RocksDbStorage {
     pub base: String,
 }
 
-#[derive(Clone)]
-pub struct RockDbProject {
+pub struct RocksDbProject {
     pub conn: DB
 }
 
@@ -15,19 +14,19 @@ impl RocksDbStorage {
         RocksDbStorage{ base: base }
     }
 
-    pub fn project(&self, project: String) -> RockDbProject {
+    pub fn project(&self, project: String) -> RocksDbProject {
         let p = format!("{}/{}", &self.base, project);
-        RockDbProject::new(DB::open_default(p).unwrap())
+        RocksDbProject::new(DB::open_default(p).unwrap())
     }
 }
 
-impl RockDbProject {
-    pub fn new(conn: DB) -> RockDbProject {
-        RockDbProject{conn: conn}
+impl RocksDbProject {
+    pub fn new(conn: DB) -> RocksDbProject {
+        RocksDbProject{conn: conn}
     }
 
 
-    pub fn put(&self, uid: &[u8], data: &str) {
+    pub fn put(&self, uid: &[u8], data: Value) {
         &self.conn.put(
             uid,
             to_string(&data).unwrap().as_str().as_bytes()

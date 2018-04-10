@@ -3,17 +3,16 @@ use std::collections::HashMap;
 use rayon::prelude::*;
 
 use super::Task;
-use super::storage::RockDbProject;
+use super::storage::RocksDbProject;
 
-#[derive(Clone)]
 pub struct Entry {
     pub tag: String,
-    pub pentity: ProcessorEntity
+    pub pentity: &'static ProcessorEntity
 }
 
 pub struct Collector {
-    pub task: Task,
-    pub entries: Vec<Entry>
+    pub task: &'static Task,
+    pub entries: Vec<&'static Entry>
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -25,16 +24,16 @@ pub struct ProcessorEntityFromYaml {
 }
 
 impl ProcessorEntityFromYaml {
-    pub fn convert_to_true_entity(&self, tasks: HashMap<String, Task>, p: RockDbProject) -> ProcessorEntity {
-        let mut sync_tasks:HashMap<String, Task> = HashMap::new();
-        let mut async_tasks:HashMap<String, Task> = HashMap::new();
+    pub fn convert_to_true_entity(&self, tasks: HashMap<String, &'static Task>, p: &'static RocksDbProject) -> ProcessorEntity {
+        let mut sync_tasks:HashMap<String, &Task> = HashMap::new();
+        let mut async_tasks:HashMap<String, &Task> = HashMap::new();
 
-        for (tname, prop) in self.sync_tasks.clone() {
-            sync_tasks.insert(prop, tasks[&tname].clone());
+        for (tname, prop) in self.sync_tasks {
+            sync_tasks.insert(prop, &tasks[&tname]);
         }
 
-        for (tname, prop) in self.async_tasks.clone() {
-            async_tasks.insert(prop, tasks[&tname].clone());
+        for (tname, prop) in self.async_tasks {
+            async_tasks.insert(prop, &tasks[&tname]);
         }
 
         ProcessorEntity {
@@ -46,19 +45,14 @@ impl ProcessorEntityFromYaml {
     }
 }
 
-#[derive(Clone)]
 pub struct ProcessorEntity {
     pub name: String,
-    storage: RockDbProject,
-    sync_tasks: HashMap<String, Task>,
-    async_tasks: HashMap<String, Task>
+    storage: &'static RocksDbProject,
+    sync_tasks: HashMap<String, &'static Task>,
+    async_tasks: HashMap<String, &'static Task>
 }
 
 impl ProcessorEntity {
-    pub fn set_storage(&self) {
-
-    }
-
     pub fn process(&self, data: &str) {
         self.sync_tasks.iter().for_each(|(prop, task)| {
 

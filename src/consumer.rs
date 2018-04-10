@@ -1,11 +1,9 @@
 use std::process::{Command, Stdio};
 use std::io::{BufRead, BufReader, Error};
-use std::collections::HashMap;
 use std::vec::Vec;
 use rayon::prelude::*;
 
 use super::processor::Entry;
-use super::Task;
 
 pub fn exec<F1, F2>(mut c: Command, success: F1, fail: F2)
 where F1: Fn(String), F2: Fn(Error) {
