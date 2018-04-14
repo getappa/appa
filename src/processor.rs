@@ -24,7 +24,7 @@ pub struct ProcessorEntityFromYaml {
 }
 
 impl ProcessorEntityFromYaml {
-    pub fn convert_to_true_entity(&self, tasks: HashMap<String, &'static Task>, p: &'static RocksDbProject) -> ProcessorEntity {
+    pub fn convert_to_true_entity(&self, tasks: &'static HashMap<String, Task>, p: &'static RocksDbProject) -> ProcessorEntity {
         let mut sync_tasks:HashMap<String, &Task> = HashMap::new();
         let mut async_tasks:HashMap<String, &Task> = HashMap::new();
 

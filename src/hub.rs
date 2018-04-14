@@ -14,32 +14,32 @@ struct EntryIterator {
 }
 
 pub struct Hub {
-    pub collectors: Vec<&'static Collector>,
+    pub collectors: Vec<Collector>,
 }
 
 impl Hub {
     pub fn new(config: ConfigurationFile) -> Hub {
-        let storage = RocksDbStorage::new(config.storage_uri);
+        let storage = RocksDbStorage::new(config.storage_uri.clone());
         let tasks = config.tasks_as_map();
         let processors = config.processors;
         let mut c_entries:Vec<EntryIterator> = Vec::new();
 
         for p in processors {
             let ctasks = p.collector_tasks.clone();
-            let project = storage.project(p.name);
+            let project = storage.project(p.name.clone());
 
             for (collector_name, tag) in ctasks {
                 c_entries.push(EntryIterator{
                     on: collector_name,
                     entry: Entry {
                         tag: tag,
-                        pentity: &p.convert_to_true_entity(tasks, &project)
+                        pentity: &p.convert_to_true_entity(&tasks, &project)
                     }
                 });
             }
         }
 
-        let mut collectors: Vec<&Collector> = Vec::new();
+        let mut collectors: Vec<Collector> = Vec::new();
         for (cname, eiters) in &c_entries.iter().group_by(|e| e.on.clone()) {
             let mut entries:Vec<&Entry> = Vec::new();
             for ei in eiters {
@@ -50,7 +50,7 @@ impl Hub {
                 task: &tasks[&cname],
                 entries: entries
             };
-            collectors.push(&collector);
+            collectors.push(collector);
         };
 
         Hub { collectors: collectors }
