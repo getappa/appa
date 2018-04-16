@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use rayon::prelude::*;
 use uuid::Uuid;
-use serde_json::{Value, from_str, to_string, Result};
+use serde_json::{Value, from_str, Result};
 
 use super::{
     Task,
@@ -72,24 +72,25 @@ impl Hub {
 
                             processor.sync_tasks.iter().for_each(|(task, prop)| {
                                 let str_data = project.get_bytes(key.clone());
-                                println!("{}", str_data);
-                                // consumer::exec(self.tasks[task].get_cmd(&str_data), |d| {
-                                //     project.update_json(
-                                //         key.clone(), prop.clone(), d
-                                //     );
-                                // }, |e| {
-                                //     println!("Err on task: {:?}", e);
-                                // });
+                                let cmd = self.tasks[task].get_cmd(&str_data);
+
+                                consumer::exec(cmd, |d| {
+                                    println!("{}", d);
+                                    // project.update_json(key.clone(), prop.clone(), d);
+                                }, |e| {
+                                    println!("Err on task: {:?}", e);
+                                });
                             });
 
-                            // processor.async_tasks.par_iter().for_each(|(task, prop)| {
-                            //     db.update_json(
-                            //         key.clone(), v.clone(),
-                            //         self.tasks.get(k).unwrap().exec(str_data.clone())
-                            //     );
-                            // });
-
-                            // println!("{:?}", new_d)
+                            let str_data = project.get_bytes(key.clone());
+                            processor.async_tasks.par_iter().for_each(|(task, prop)| {
+                                consumer::exec(self.tasks[task].get_cmd(&str_data), |d| {
+                                    println!("{}", d);
+                                    // project.update_json(key.clone(), prop.clone(), d);
+                                }, |e| {
+                                    println!("{:?}", e);
+                                });
+                            });
                         });
                     }
                 }

@@ -3,7 +3,12 @@ import json
 
 class AppaCommand():
     def __init__(self):
-        self.data = json.loads(sys.argv[1])
+        data = json.loads(sys.argv[1])
+
+        if isinstance(data, list):
+            data = data[0]
+
+        self.data = data
 
     def send(self, val):
         sys.stdout.write("{}".format(val))
