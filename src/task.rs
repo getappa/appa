@@ -1,6 +1,5 @@
 use std::process::Command;
 
-#[derive(Clone)]
 pub struct Task {
     command: String,
     path: String
@@ -16,8 +15,9 @@ impl Task {
     }
 
     pub fn get_cmd(&self, d: &str) -> Command {
+        println!("Will Call > {} {}", self.to_string(), format!("'{}'", d));
         let mut cmd = Command::new(&self.command);
-        cmd.arg(&self.path).arg(d.clone());
+        cmd.arg(&self.path).arg(format!("'{}'", d));
         cmd
     }
 }

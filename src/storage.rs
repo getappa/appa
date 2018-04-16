@@ -40,6 +40,11 @@ impl RocksDbProject {
         );
     }
 
+    pub fn get_bytes(&self, key: &[u8]) -> String {
+        let resp_oks = self.conn.get(&key).ok().unwrap().unwrap();
+        String::from(resp_oks.to_utf8().unwrap())
+    }
+
     pub fn get(&self, key: &[u8]) -> Value {
         let resp_oks = self.conn.get(&key).ok().unwrap().unwrap();
         let resp_bts = resp_oks.to_utf8().unwrap();

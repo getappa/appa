@@ -1,58 +1,109 @@
-use std::vec::Vec;
-use itertools::Itertools;
+use std::collections::HashMap;
+use rayon::prelude::*;
+use uuid::Uuid;
+use serde_json::{Value, from_str, to_string, Result};
 
-use super::processor::{Collector, Entry};
 use super::{
-    RocksDbStorage,
-    RocksDbProject,
+    Task,
+    ProcessEntity,
     ConfigurationFile,
+    RocksDbStorage,
+    consumer
 };
 
-struct EntryIterator {
-    on: String,
-    entry: Entry,
+enum IdRef {
+    RefStr(String),
+    RefUid(Uuid)
+}
+
+pub struct Collector {
+    pub entries: HashMap<String, String>,
+    pub task: String
 }
 
 pub struct Hub {
-    pub collectors: Vec<Collector>,
+    tasks: HashMap<String, Task>,
+    collectors: Vec<Collector>,
+    processors: HashMap<String, ProcessEntity>,
+    storage: RocksDbStorage
 }
 
 impl Hub {
     pub fn new(config: ConfigurationFile) -> Hub {
         let storage = RocksDbStorage::new(config.storage_uri.clone());
-        let tasks = config.tasks_as_map();
-        let processors = config.processors;
-        let mut c_entries:Vec<EntryIterator> = Vec::new();
 
-        for p in processors {
-            let ctasks = p.collector_tasks.clone();
-            let project = storage.project(p.name.clone());
-
-            for (collector_name, tag) in ctasks {
-                c_entries.push(EntryIterator{
-                    on: collector_name,
-                    entry: Entry {
-                        tag: tag,
-                        pentity: &p.convert_to_true_entity(&tasks, &project)
-                    }
-                });
-            }
+        Hub{
+            tasks: config.tasks_as_map(),
+            collectors: config.collectors_as_vec(),
+            processors: config.processors_as_map(),
+            storage: storage
         }
+    }
 
-        let mut collectors: Vec<Collector> = Vec::new();
-        for (cname, eiters) in &c_entries.iter().group_by(|e| e.on.clone()) {
-            let mut entries:Vec<&Entry> = Vec::new();
-            for ei in eiters {
-                entries.push(&ei.entry)
-            }
+    pub fn start(self) {
+        self.collectors.par_iter().for_each(|collector| {
+            let cmd = self.get_task(&collector.task).get_cmd("");
+            consumer::exec(cmd, |d| {
+                for (tag, entity) in &collector.entries {
+                    let ef = format!("!AppaTag({})", tag);
+                    if d.contains(&ef) {
+                        let processor = self.get_processor(&entity);
+                        let project = self.storage.project(processor.name.clone());
+                        let data = d.replace(&ef, "");
+                        let json:Result<Value> = from_str(&data);
+                        let done = json.ok().unwrap();
+                        let arr = done.as_array().unwrap();
 
-            let collector = Collector {
-                task: &tasks[&cname],
-                entries: entries
-            };
-            collectors.push(collector);
-        };
+                        arr.par_iter().for_each(|item| {
+                            let core_id = if processor.id_prop == "" {
+                                IdRef::RefUid(Uuid::new_v4())
+                            } else {
+                                IdRef::RefStr(
+                                    item[processor.id_prop.clone()].to_string()
+                                )
+                            };
 
-        Hub { collectors: collectors }
+                            let key = match core_id {
+                                IdRef::RefUid(ref x) => x.as_bytes(),
+                                IdRef::RefStr(ref y) => y.as_bytes()
+                            };
+
+                            project.put_string(key, data.clone());
+
+                            processor.sync_tasks.iter().for_each(|(task, prop)| {
+                                let str_data = project.get_bytes(key.clone());
+                                println!("{}", str_data);
+                                // consumer::exec(self.tasks[task].get_cmd(&str_data), |d| {
+                                //     project.update_json(
+                                //         key.clone(), prop.clone(), d
+                                //     );
+                                // }, |e| {
+                                //     println!("Err on task: {:?}", e);
+                                // });
+                            });
+
+                            // processor.async_tasks.par_iter().for_each(|(task, prop)| {
+                            //     db.update_json(
+                            //         key.clone(), v.clone(),
+                            //         self.tasks.get(k).unwrap().exec(str_data.clone())
+                            //     );
+                            // });
+
+                            // println!("{:?}", new_d)
+                        });
+                    }
+                }
+            }, |e| {
+                println!("{:?}", e);
+            });
+        });
+    }
+
+    fn get_processor(&self, entity: &str) -> &ProcessEntity {
+        &self.processors[entity]
+    }
+
+    fn get_task(&self, name: &String) -> &Task {
+        &self.tasks[name]
     }
 }
