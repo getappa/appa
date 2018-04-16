@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use rayon::prelude::*;
 use uuid::Uuid;
-use serde_json::{Value, from_str, Result};
+use serde_json::{Value, from_str, to_string, Result};
 
 use super::{
     Task,
@@ -68,15 +68,20 @@ impl Hub {
                                 IdRef::RefStr(ref y) => y.as_bytes()
                             };
 
-                            project.put_string(key, data.clone());
+
+                            let str_item = match to_string(item) {
+                                Ok(i) => i,
+                                Err(_) => String::new()
+                            };
+
+                            project.put_string(key, &str_item);
 
                             processor.sync_tasks.iter().for_each(|(task, prop)| {
                                 let str_data = project.get_bytes(key.clone());
                                 let cmd = self.tasks[task].get_cmd(&str_data);
 
                                 consumer::exec(cmd, |d| {
-                                    println!("{}", d);
-                                    // project.update_json(key.clone(), prop.clone(), d);
+                                    project.update_json(key, prop, &d);
                                 }, |e| {
                                     println!("Err on task: {:?}", e);
                                 });
@@ -85,8 +90,7 @@ impl Hub {
                             let str_data = project.get_bytes(key.clone());
                             processor.async_tasks.par_iter().for_each(|(task, prop)| {
                                 consumer::exec(self.tasks[task].get_cmd(&str_data), |d| {
-                                    println!("{}", d);
-                                    // project.update_json(key.clone(), prop.clone(), d);
+                                    project.update_json(key, prop, &d);
                                 }, |e| {
                                     println!("{:?}", e);
                                 });

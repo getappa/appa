@@ -1,6 +1,6 @@
 use rocksdb::DB;
 use serde_json::{Value, to_string, from_str};
-
+// use std:thread;
 pub struct RocksDbStorage {
     pub base: String,
 }
@@ -26,14 +26,14 @@ impl RocksDbProject {
     }
 
 
-    pub fn put(&self, uid: &[u8], data: Value) {
+    pub fn put(&self, uid: &[u8], data: &Value) {
         &self.conn.put(
             uid,
-            to_string(&data).unwrap().as_str().as_bytes()
+            to_string(data).unwrap().as_str().as_bytes()
         );
     }
 
-    pub fn put_string(&self, uid: &[u8], json: String) {
+    pub fn put_string(&self, uid: &[u8], json: &str) {
         &self.conn.put(
             uid,
             json.as_bytes()
@@ -51,16 +51,17 @@ impl RocksDbProject {
         from_str(resp_bts).ok().unwrap()
     }
 
-    pub fn update_json(&self, key: &[u8], prop: String, value: String) {
-        let json_map = self.get(key);
-        let json_obj = json_map.as_object();
-        let json_ref = json_obj.unwrap();
-
-        let mut json = json_ref.clone();
-
-        json.insert(prop, Value::from(value));
-
-        let new_value = Value::from(json);
-        &self.put(&key, new_value);
+    pub fn update_json(&self, key: &[u8], prop: &str, value: &str) {
+        let mut json_map = self.get(key);
+        let json_obj = json_map.as_object_mut();
+        match json_obj {
+            Some(json) => {
+                json.insert(String::from(prop), Value::from(value));
+                &self.put(&key, &Value::from(json.clone()));
+            },
+            None => {
+                println!("Deu ruim");
+            }
+        }
     }
 }

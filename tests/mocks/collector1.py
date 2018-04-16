@@ -6,4 +6,4 @@ json_str = json.dumps([
     { 'name': 'heydineia', 'age': 32 },
 ])
 
-sys.stdout.write(json_str)
+sys.stdout.write("!AppaTag(_){}\n".format(json_str))

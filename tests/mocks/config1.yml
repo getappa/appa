@@ -18,12 +18,19 @@ tasks:
 
 processors:
   - name: 'users'
-    id_prop: 'id'
+    id_prop: ''
     collector_tasks:
-      # collector_users: _
+      collector_users: _
       collector_mult: user
     sync_tasks:
       py_2: esc
-      # py_3: esc_2
+    async_tasks:
+      py_1: count
+  - name: 'cars'
+    id_prop: 'id'
+    collector_tasks:
+      collector_mult: car
+    sync_tasks:
+      py_2: esc
     async_tasks:
       py_1: count
