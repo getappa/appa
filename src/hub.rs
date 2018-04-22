@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use rayon::prelude::*;
 use uuid::Uuid;
+use std::option::Option;
+use std::vec::Vec;
 use serde_json::{Value, from_str, to_string, Result};
 
 use super::{
@@ -50,9 +52,21 @@ impl Hub {
                         let processor = self.get_processor(&entity);
                         let project = self.storage.project(processor.name.clone());
                         let data = d.replace(&ef, "");
-                        let json:Result<Value> = from_str(&data);
-                        let done = json.ok().unwrap();
-                        let arr = done.as_array().unwrap();
+
+                        let arr = match from_str::<Option<Value>>(&data) {
+                            Ok(Some(done)) => match done.as_array() {
+                                Some(arr) => arr.clone(),
+                                None => Vec::new()
+                            },
+                            Ok(None) => {
+                                println!("Parser return NONE");
+                                Vec::new()
+                            },
+                            Err(e) => {
+                                println!("Error on parse collector data{:?}", e);
+                                Vec::new()
+                            }
+                        };
 
                         arr.par_iter().for_each(|item| {
                             let core_id = if processor.id_prop == "" {
