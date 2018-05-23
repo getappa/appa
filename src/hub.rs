@@ -3,7 +3,7 @@ use rayon::prelude::*;
 use uuid::Uuid;
 use std::option::Option;
 use std::vec::Vec;
-use serde_json::{Value, from_str, to_string, Result};
+use serde_json::{Value, from_str, to_string};
 
 use super::{
     Task,
