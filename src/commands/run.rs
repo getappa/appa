@@ -1,5 +1,10 @@
-use super::super::Cli;
+use super::super::{
+    Hub,
+    ConfigurationFile
+};
 
-pub fn run(opts: Cli) {
-    println!("run {:?}", opts)
+pub fn run(file: String) {
+    let config = ConfigurationFile::new(&file);
+    let hub = Hub::new(config);
+    hub.start();
 }

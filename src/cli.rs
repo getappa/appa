@@ -7,8 +7,8 @@ use super::commands;
 pub enum Cli {
     #[structopt(name = "run")]
     Run {
-        #[structopt(short = "d", long = "debug")]
-        debug: bool,
+        #[structopt(name = "FILE")]
+        file: String
     },
 
     #[structopt(name = "link")]
@@ -25,7 +25,7 @@ pub fn cli() {
     let opts = Cli::from_args();
 
     match opts {
-        Cli::Run{ .. } => commands::run(opts),
+        Cli::Run{ file } => commands::run(file),
         Cli::Prop{ .. } => commands::prop(opts),
         Cli::Link{ .. } => commands::link(opts),
         Cli::New{ .. } => commands::new(opts)
