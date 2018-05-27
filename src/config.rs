@@ -20,11 +20,11 @@ struct EntryIterator {
     pub entry: Entry
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ConfigurationFile {
     pub storage_uri: String,
     pub processors: Vec<ProcessEntity>,
-    tasks: Vec<HashMap<String, String>>,
+    pub tasks: Vec<HashMap<String, String>>,
 }
 
 impl ConfigurationFile {
@@ -37,6 +37,13 @@ impl ConfigurationFile {
             serde_yaml::from_str(&data).unwrap();
 
         ac
+    }
+
+    pub fn save(&self, path: &str) {
+        let new_yaml = serde_yaml::to_string(&self).unwrap();
+        let mut file = File::create(&path).unwrap();
+
+        file.write_all(new_yaml.as_bytes());
     }
 
     pub fn tasks_as_map(&self) -> HashMap<String, Task> {

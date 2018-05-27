@@ -1,27 +1,41 @@
 use structopt::StructOpt;
-use structopt::clap::AppSettings;
 use super::commands;
 
 #[derive(StructOpt, Debug)]
-#[structopt(raw(setting = "AppSettings::InferSubcommands"))]
-pub enum Cli {
+pub struct Cli {
+    #[structopt(name = "FILE")]
+    file: String,
+
+    #[structopt(subcommand)]
+    cmd: Option<CliSubcommands>
+}
+
+#[derive(StructOpt, Debug)]
+pub enum CliSubcommands {
     #[structopt(name = "run")]
-    Run {
-        #[structopt(name = "FILE")]
-        file: String
+    Run {},
+
+    // #[structopt(name = "link")]
+    // Link {},
+
+    #[structopt(name = "task")]
+    Task {
+        #[structopt(name = "NAME")]
+        name: String,
+
+        #[structopt(name = "COMMAND")]
+        command: String,
+
+        #[structopt(name = "PATH")]
+        path: String,
     },
 
-    #[structopt(name = "link")]
-    Link {},
+    // Processor {
 
-    #[structopt(name = "new")]
-    New {},
+    // },
 
     #[structopt(name = "prop")]
     Prop {
-        #[structopt(name = "FILE")]
-        file: String,
-
         #[structopt(name = "ENTITY")]
         entity: String,
 
@@ -39,13 +53,17 @@ pub enum Cli {
 pub fn cli() {
     let opts = Cli::from_args();
 
-    match opts {
-        Cli::Run{ file } => commands::run(file),
-        Cli::Prop{
-            file, entity, key, prop, value
-        } => commands::prop(file, entity, key, prop, value),
-        Cli::Link{ .. } => commands::link(opts),
-        Cli::New{ .. } => commands::new(opts)
+    match opts.cmd {
+        Some(value) => match value {
+            CliSubcommands::Run{} => commands::run(opts.file),
+            CliSubcommands::Prop{ entity, key, prop, value } =>
+                commands::prop(opts.file, entity, key, prop, value),
+            CliSubcommands::Task{ name, command, path } =>
+                commands::new_task(opts.file, name, command, path)
+        },
+        None => {
+            commands::run(opts.file);
+        }
     }
 }
 
