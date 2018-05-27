@@ -1,7 +1,4 @@
-use super::super::{
-    Hub,
-    ConfigurationFile
-};
+use super::super::{ Hub, ConfigurationFile };
 
 pub fn run(file: String) {
     let config = ConfigurationFile::new(&file);
