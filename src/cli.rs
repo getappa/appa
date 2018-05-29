@@ -1,5 +1,34 @@
-use structopt::StructOpt;
 use super::commands;
+use structopt::StructOpt;
+use std::{
+    vec::Vec,
+    str::FromStr,
+    string::ToString
+};
+
+#[derive(Debug)]
+pub struct KeyValueParseError;
+
+impl ToString for KeyValueParseError {
+    fn to_string(&self) -> String {
+        "Invalid key:value pair".into()
+    }
+}
+
+fn parse_key_value<K, V>(s: &str) -> Result<(K, V), KeyValueParseError>
+where
+    K: FromStr,
+    V: FromStr,
+{
+    let mut parts = s.split(':');
+    let key = parts.next().map(K::from_str);
+    let value = parts.next().map(V::from_str);
+
+    match (key, value) {
+        (Some(Ok(k)), Some(Ok(v))) => Ok((k, v)),
+        _ => Err(KeyValueParseError),
+    }
+}
 
 #[derive(StructOpt, Debug)]
 pub struct Cli {
@@ -30,9 +59,22 @@ pub enum CliSubcommands {
         path: String,
     },
 
-    // Processor {
+    Processor {
+        #[structopt(name = "NAME")]
+        name: String,
 
-    // },
+        #[structopt(short = "i", long = "id-prop", default_value = "")]
+        id_prop: String,
+
+        #[structopt(short = "c", long = "collector", default_value = Vec::new(), parse(try_from_str = "parse_key_value"))]
+        collectors: Vec<(String, String)>,
+
+        #[structopt(short = "s", long = "sync", default_value = Vec::new(), parse(try_from_str = "parse_key_value"))]
+        sync: Vec<(String, String)>,
+
+        #[structopt(short = "a", long = "async", default_value = Vec::new(), parse(try_from_str = "parse_key_value"))]
+        async: Vec<(String, String)>
+    },
 
     #[structopt(name = "prop")]
     Prop {
@@ -59,7 +101,14 @@ pub fn cli() {
             CliSubcommands::Prop{ entity, key, prop, value } =>
                 commands::prop(opts.file, entity, key, prop, value),
             CliSubcommands::Task{ name, command, path } =>
-                commands::new_task(opts.file, name, command, path)
+                commands::new_task(opts.file, name, command, path),
+            CliSubcommands::Processor{ name, id_prop, collectors, sync, async } =>
+                commands::new_task(
+                    opts.file, name, id_prop,
+                    collectors.into_iter().collect::<HashMap<_, _>>(),
+                    sync.into_iter().collect::<HashMap<_, _>>(),
+                    async.into_iter().collect::<HashMap<_, _>>()
+                )
         },
         None => {
             commands::run(opts.file);
