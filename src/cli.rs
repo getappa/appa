@@ -60,6 +60,14 @@ pub enum CliSubcommands {
     /// Execute appa collector and processors
     Run {},
 
+    #[structopt(name = "set_storage")]
+    // Set storage uri link
+    SetUri {
+        #[structopt(name = "PATH")]
+        /// Storage URI path
+        path: String,
+    },
+
     #[structopt(name = "link")]
     /// Link tasks to processors
     Link {
@@ -129,10 +137,16 @@ pub fn cli() {
     match opts.cmd {
         Some(value) => match value {
             CliSubcommands::Run{} => commands::run(opts.file),
+
+            CliSubcommands::SetUri { path } =>
+                commands::set_storage(opts.file, path),
+
             CliSubcommands::Prop{ entity, key, prop, value } =>
                 commands::prop(opts.file, entity, key, prop, value),
+
             CliSubcommands::Task{ name, command, path } =>
                 commands::new_task(opts.file, name, command, path),
+
             CliSubcommands::Processor{ name, id_prop, link_flags } =>
                 commands::new_processor(
                     opts.file, name, id_prop,
@@ -140,6 +154,7 @@ pub fn cli() {
                     link_flags.sync.into_iter().collect::<HashMap<_, _>>(),
                     link_flags.async.into_iter().collect::<HashMap<_, _>>()
                 ),
+
             CliSubcommands::Link{ name, flags } =>
                 commands::link(
                     opts.file, name,
