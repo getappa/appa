@@ -43,8 +43,20 @@ pub enum CliSubcommands {
     #[structopt(name = "run")]
     Run {},
 
-    // #[structopt(name = "link")]
-    // Link {},
+    #[structopt(name = "link")]
+    Link {
+        #[structopt(name = "NAME")]
+        name: String,
+
+        #[structopt(short = "c", long = "collector", parse(try_from_str = "parse_key_value"))]
+        collectors: Vec<(String, String)>,
+
+        #[structopt(short = "s", long = "sync", parse(try_from_str = "parse_key_value"))]
+        sync: Vec<(String, String)>,
+
+        #[structopt(short = "a", long = "async", parse(try_from_str = "parse_key_value"))]
+        async: Vec<(String, String)>
+    },
 
     #[structopt(name = "task")]
     Task {
@@ -105,6 +117,13 @@ pub fn cli() {
             CliSubcommands::Processor{ name, id_prop, collectors, sync, async } =>
                 commands::new_processor(
                     opts.file, name, id_prop,
+                    collectors.into_iter().collect::<HashMap<_, _>>(),
+                    sync.into_iter().collect::<HashMap<_, _>>(),
+                    async.into_iter().collect::<HashMap<_, _>>()
+                ),
+            CliSubcommands::Link{ name, collectors, sync, async } =>
+                commands::link(
+                    opts.file, name,
                     collectors.into_iter().collect::<HashMap<_, _>>(),
                     sync.into_iter().collect::<HashMap<_, _>>(),
                     async.into_iter().collect::<HashMap<_, _>>()
