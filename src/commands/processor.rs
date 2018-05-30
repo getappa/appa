@@ -1,4 +1,4 @@
-use super::super::ProcessorEntity;
+use super::super::{ConfigurationFile, ProcessEntity};
 use std::collections::HashMap;
 
 pub fn new_processor(
@@ -14,7 +14,7 @@ pub fn new_processor(
     config.processors.push(ProcessEntity{
         name: name,
         id_prop: id_prop,
-        collectors_tasks: collectors,
+        collector_tasks: collectors,
         sync_tasks: sync_tasks,
         async_tasks: async_tasks
     });

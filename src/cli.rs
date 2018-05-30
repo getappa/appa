@@ -1,10 +1,9 @@
 use super::commands;
 use structopt::StructOpt;
-use std::{
-    vec::Vec,
-    str::FromStr,
-    string::ToString
-};
+use std::vec::Vec;
+use std::collections::HashMap;
+use std::str::FromStr;
+use std::string::ToString;
 
 #[derive(Debug)]
 pub struct KeyValueParseError;
@@ -59,6 +58,7 @@ pub enum CliSubcommands {
         path: String,
     },
 
+    #[structopt(name = "processor")]
     Processor {
         #[structopt(name = "NAME")]
         name: String,
@@ -66,13 +66,13 @@ pub enum CliSubcommands {
         #[structopt(short = "i", long = "id-prop", default_value = "")]
         id_prop: String,
 
-        #[structopt(short = "c", long = "collector", default_value = Vec::new(), parse(try_from_str = "parse_key_value"))]
+        #[structopt(short = "c", long = "collector", parse(try_from_str = "parse_key_value"))]
         collectors: Vec<(String, String)>,
 
-        #[structopt(short = "s", long = "sync", default_value = Vec::new(), parse(try_from_str = "parse_key_value"))]
+        #[structopt(short = "s", long = "sync", parse(try_from_str = "parse_key_value"))]
         sync: Vec<(String, String)>,
 
-        #[structopt(short = "a", long = "async", default_value = Vec::new(), parse(try_from_str = "parse_key_value"))]
+        #[structopt(short = "a", long = "async", parse(try_from_str = "parse_key_value"))]
         async: Vec<(String, String)>
     },
 
@@ -103,7 +103,7 @@ pub fn cli() {
             CliSubcommands::Task{ name, command, path } =>
                 commands::new_task(opts.file, name, command, path),
             CliSubcommands::Processor{ name, id_prop, collectors, sync, async } =>
-                commands::new_task(
+                commands::new_processor(
                     opts.file, name, id_prop,
                     collectors.into_iter().collect::<HashMap<_, _>>(),
                     sync.into_iter().collect::<HashMap<_, _>>(),
