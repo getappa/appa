@@ -1,4 +1,4 @@
-use super::commands;
+use super::{commands, api};
 use structopt::StructOpt;
 use std::vec::Vec;
 use std::collections::HashMap;
@@ -164,7 +164,7 @@ pub fn cli() {
                 )
         },
         None => {
-            commands::run(opts.file);
+            api::init_server(opts.file);
         }
     }
 }
