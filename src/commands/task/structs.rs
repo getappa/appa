@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-// use rocket_contrib::Json
 
 #[derive(Serialize, Deserialize, Debug, StructOpt)]
 pub struct Task {

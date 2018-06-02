@@ -1,33 +1,5 @@
 use super::{commands, api};
 use structopt::StructOpt;
-use std::vec::Vec;
-use std::collections::HashMap;
-use std::str::FromStr;
-use std::string::ToString;
-
-#[derive(Debug)]
-pub struct KeyValueParseError;
-
-impl ToString for KeyValueParseError {
-    fn to_string(&self) -> String {
-        "Invalid key:value pair".into()
-    }
-}
-
-fn parse_key_value<K, V>(s: &str) -> Result<(K, V), KeyValueParseError>
-where
-    K: FromStr,
-    V: FromStr,
-{
-    let mut parts = s.split(':');
-    let key = parts.next().map(K::from_str);
-    let value = parts.next().map(V::from_str);
-
-    match (key, value) {
-        (Some(Ok(k)), Some(Ok(v))) => Ok((k, v)),
-        _ => Err(KeyValueParseError),
-    }
-}
 
 #[derive(StructOpt, Debug)]
 pub struct Cli {
@@ -37,21 +9,6 @@ pub struct Cli {
 
     #[structopt(subcommand)]
     cmd: Option<CliSubcommands>
-}
-
-#[derive(StructOpt, Debug)]
-pub struct LinkFlags {
-    #[structopt(short = "c", long = "collector", parse(try_from_str = "parse_key_value"))]
-    /// Link a collector task
-    collectors: Vec<(String, String)>,
-
-    #[structopt(short = "s", long = "sync", parse(try_from_str = "parse_key_value"))]
-    /// Link a sync task
-    sync: Vec<(String, String)>,
-
-    #[structopt(short = "a", long = "async", parse(try_from_str = "parse_key_value"))]
-    /// Link an async task
-    async: Vec<(String, String)>
 }
 
 #[derive(StructOpt, Debug)]
@@ -70,14 +27,7 @@ pub enum CliSubcommands {
 
     #[structopt(name = "link")]
     /// Link tasks to processors
-    Link {
-        #[structopt(name = "NAME")]
-        /// Processor's name for link tasks
-        name: String,
-
-        #[structopt(flatten)]
-        flags: LinkFlags
-    },
+    Link(commands::link::Link),
 
     #[structopt(name = "task")]
     /// Create a new task
@@ -85,18 +35,7 @@ pub enum CliSubcommands {
 
     #[structopt(name = "processor")]
     /// Create a new processor
-    Processor {
-        #[structopt(name = "NAME")]
-        /// New processor name
-        name: String,
-
-        #[structopt(short = "i", long = "id-prop", default_value = "")]
-        /// Insert an prop that will be used as id
-        id_prop: String,
-
-        #[structopt(flatten)]
-        link_flags: LinkFlags
-    },
+    Processor(commands::processor::Processor),
 
     #[structopt(name = "prop")]
     /// Add a value to a prop inside database
@@ -135,21 +74,11 @@ pub fn cli() {
             CliSubcommands::Task(task) =>
                 commands::task::new(&opts.file, &task),
 
-            CliSubcommands::Processor{ name, id_prop, link_flags } =>
-                commands::new_processor(
-                    opts.file, name, id_prop,
-                    link_flags.collectors.into_iter().collect::<HashMap<_, _>>(),
-                    link_flags.sync.into_iter().collect::<HashMap<_, _>>(),
-                    link_flags.async.into_iter().collect::<HashMap<_, _>>()
-                ),
+            CliSubcommands::Processor(processor) =>
+                commands::processor::new(&opts.file, &processor),
 
-            CliSubcommands::Link{ name, flags } =>
-                commands::link(
-                    opts.file, name,
-                    flags.collectors.into_iter().collect::<HashMap<_, _>>(),
-                    flags.sync.into_iter().collect::<HashMap<_, _>>(),
-                    flags.async.into_iter().collect::<HashMap<_, _>>()
-                )
+            CliSubcommands::Link(link_info) =>
+                commands::link::exec(&opts.file, &link_info)
         },
         None => {
             api::init_server(opts.file);
