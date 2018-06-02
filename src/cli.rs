@@ -15,15 +15,11 @@ pub struct Cli {
 pub enum CliSubcommands {
     #[structopt(name = "run")]
     /// Execute appa collector and processors
-    Run {},
+    Run(commands::execution::Run),
 
     #[structopt(name = "set_storage")]
     // Set storage uri link
-    SetUri {
-        #[structopt(name = "PATH")]
-        /// Storage URI path
-        path: String,
-    },
+    SetUri(commands::execution::SetUri),
 
     #[structopt(name = "link")]
     /// Link tasks to processors
@@ -39,23 +35,7 @@ pub enum CliSubcommands {
 
     #[structopt(name = "prop")]
     /// Add a value to a prop inside database
-    Prop {
-        #[structopt(name = "ENTITY")]
-        /// Processor Entity that you want to check
-        entity: String,
-
-        #[structopt(name = "KEY")]
-        /// The key of the data that you want to insert a prop
-        key: String,
-
-        #[structopt(name = "PROP")]
-        /// Property name
-        prop: String,
-
-        #[structopt(name = "VALUE")]
-        /// Value that you want to insert
-        value: String
-    },
+    Prop(commands::prop::Prop)
 }
 
 pub fn cli() {
@@ -63,13 +43,14 @@ pub fn cli() {
 
     match opts.cmd {
         Some(value) => match value {
-            CliSubcommands::Run{} => commands::run(opts.file),
+            CliSubcommands::Run(run_opts) =>
+                commands::execution::run(&opts.file, &run_opts),
 
-            CliSubcommands::SetUri { path } =>
-                commands::set_storage(opts.file, path),
+            CliSubcommands::SetUri(uri_opts) =>
+                commands::execution::set_storage(&opts.file, &uri_opts),
 
-            CliSubcommands::Prop{ entity, key, prop, value } =>
-                commands::prop(opts.file, entity, key, prop, value),
+            CliSubcommands::Prop(prop_opts) =>
+                commands::prop::attach(&opts.file, &prop_opts),
 
             CliSubcommands::Task(task) =>
                 commands::task::new(&opts.file, &task),

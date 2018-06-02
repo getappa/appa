@@ -1,8 +1,11 @@
 use rocket;
 use super::commands::{
-    task,
-    processor,
-    link
+    task::api as task,
+    processor::api as processor,
+    link::api as link,
+    execution::api as execution,
+    prop::api as prop
+
 };
 
 pub struct Global {
@@ -11,9 +14,12 @@ pub struct Global {
 
 pub fn init_server(file: String) {
     let router = routes![
-        task::api::create,
-        processor::api::create,
-        link::api::exec
+        task::create,
+        processor::create,
+        link::exec,
+        execution::run,
+        execution::set_storage,
+        prop::attach
     ];
 
     rocket::ignite()
