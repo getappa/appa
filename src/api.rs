@@ -1,13 +1,13 @@
-mod task;
-pub mod common;
-
 use rocket;
-use self::common::Global;
+use super::commands::{task};
+
+pub struct Global {
+    pub file: String
+}
 
 pub fn init_server(file: String) {
-
     let router = routes![
-        task::create,
+        task::api::create,
     ];
 
     rocket::ignite()

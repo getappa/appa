@@ -81,19 +81,7 @@ pub enum CliSubcommands {
 
     #[structopt(name = "task")]
     /// Create a new task
-    Task {
-        #[structopt(name = "NAME")]
-        // Task name
-        name: String,
-
-        #[structopt(name = "COMMAND")]
-        // Task command
-        command: String,
-
-        #[structopt(name = "PATH")]
-        // Task script path
-        path: String,
-    },
+    Task(commands::task::Task),
 
     #[structopt(name = "processor")]
     /// Create a new processor
@@ -144,8 +132,8 @@ pub fn cli() {
             CliSubcommands::Prop{ entity, key, prop, value } =>
                 commands::prop(opts.file, entity, key, prop, value),
 
-            CliSubcommands::Task{ name, command, path } =>
-                commands::new_task(opts.file, name, command, path),
+            CliSubcommands::Task(task) =>
+                commands::task::new(&opts.file, &task),
 
             CliSubcommands::Processor{ name, id_prop, link_flags } =>
                 commands::new_processor(
