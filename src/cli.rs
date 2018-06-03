@@ -27,7 +27,7 @@ pub enum CliSubcommands {
 
     #[structopt(name = "task")]
     /// Create a new task
-    Task(commands::task::Task),
+    Task(commands::task::TaskCommands),
 
     #[structopt(name = "processor")]
     /// Create a new processor
@@ -52,8 +52,8 @@ pub fn cli() {
             CliSubcommands::Prop(prop_opts) =>
                 commands::prop::attach(&opts.file, &prop_opts),
 
-            CliSubcommands::Task(task) =>
-                commands::task::new(&opts.file, &task),
+            CliSubcommands::Task(task_opts) =>
+                commands::task::exec(&opts.file, &task_opts),
 
             CliSubcommands::Processor(processor) =>
                 commands::processor::new(&opts.file, &processor),

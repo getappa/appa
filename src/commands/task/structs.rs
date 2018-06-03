@@ -15,6 +15,46 @@ pub struct Task {
     path: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, StructOpt)]
+pub struct TaskUpdate {
+    #[structopt(name = "NAME")]
+    // Task name
+    pub name: String,
+
+    #[structopt(short = "c", long= "command", default_value="")]
+    // Command to be updated
+    pub command: String,
+
+    #[structopt(short = "p", long= "path", default_value="")]
+    // Path to be updated
+    pub path: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, StructOpt)]
+pub struct TaskSimple {
+    #[structopt(name = "NAME")]
+    // Task name
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, StructOpt)]
+pub enum TaskCommands {
+    #[structopt(name = "name")]
+    Create(Task),
+
+    #[structopt(name = "update")]
+    Update(TaskUpdate),
+
+    #[structopt(name = "rm")]
+    Remove(TaskSimple),
+
+    #[structopt(name = "get")]
+    Get(TaskSimple),
+
+    #[structopt(name = "list")]
+    List
+}
+
 impl Task {
     pub fn to_hashmap(&self) -> HashMap<String, String> {
         let mut task = HashMap::new();
