@@ -15,6 +15,10 @@ pub struct Global {
 pub fn init_server(file: String) {
     let router = routes![
         task::create,
+        task::update,
+        task::remove,
+        task::list,
+        task::get,
         processor::create,
         link::exec,
         execution::run,
