@@ -31,7 +31,7 @@ pub enum CliSubcommands {
 
     #[structopt(name = "processor")]
     /// Create a new processor
-    Processor(commands::processor::Processor),
+    Processor(commands::processor::ProcessorCommands),
 
     #[structopt(name = "prop")]
     /// Add a value to a prop inside database
@@ -55,8 +55,8 @@ pub fn cli() {
             CliSubcommands::Task(task_opts) =>
                 commands::task::exec(&opts.file, &task_opts),
 
-            CliSubcommands::Processor(processor) =>
-                commands::processor::new(&opts.file, &processor),
+            CliSubcommands::Processor(processor_opts) =>
+                commands::processor::exec(&opts.file, &processor_opts),
 
             CliSubcommands::Link(link_info) =>
                 commands::link::exec(&opts.file, &link_info)

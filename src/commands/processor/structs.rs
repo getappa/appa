@@ -18,6 +18,31 @@ pub struct Processor {
     pub flags: LinkFlags
 }
 
+#[derive(Serialize, Deserialize, Debug, StructOpt)]
+pub struct ProcessorSimple {
+    #[structopt(name = "NAME")]
+    /// Processor name
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, StructOpt)]
+pub enum ProcessorCommands {
+    #[structopt(name = "create")]
+    Create(Processor),
+
+    #[structopt(name = "update")]
+    Update(Processor),
+
+    #[structopt(name = "rm")]
+    Remove(ProcessorSimple),
+
+    #[structopt(name = "get")]
+    Get(ProcessorSimple),
+
+    #[structopt(name = "list")]
+    List
+}
+
 impl Processor {
     pub fn to_entity(&self) -> ProcessEntity {
         let flags = self.flags.clone();
