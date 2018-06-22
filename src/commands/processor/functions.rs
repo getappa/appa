@@ -33,6 +33,10 @@ pub fn update(file: &str, processor: &Processor) {
                 p.async_tasks.extend(pe.async_tasks)
             }
 
+            if pe.pos_tasks.len() > 0 {
+                p.pos_tasks.extend(pe.pos_tasks)
+            }
+
             p
         });
 

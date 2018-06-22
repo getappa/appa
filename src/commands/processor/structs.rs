@@ -58,7 +58,8 @@ impl Processor {
             id_prop: self.id_prop.clone(),
             collector_tasks: collectors,
             sync_tasks: sync_tasks,
-            async_tasks: async_tasks
+            async_tasks: async_tasks,
+            pos_tasks: flags.pos
         }
     }
 }

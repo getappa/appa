@@ -16,6 +16,13 @@ tasks:
     command: 'python'
     path: 'tests/mocks/collector2.py'
 
+  - name: 'map'
+    command: 'python'
+    path: 'tests/mocks/map.py'
+  - name: 'reduce'
+    command: 'python'
+    path: 'tests/mocks/reduc.py'
+
 processors:
   - name: 'users'
     id_prop: ''
@@ -26,6 +33,8 @@ processors:
       py_2: esc
     async_tasks:
       py_1: count
+    pos_tasks:
+      - reduce
   - name: 'cars'
     id_prop: 'id'
     collector_tasks:
@@ -34,3 +43,5 @@ processors:
       py_2: esc
     async_tasks:
       py_1: count
+    pos_tasks:
+      - map

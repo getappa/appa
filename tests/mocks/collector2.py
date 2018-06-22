@@ -4,7 +4,7 @@ from time import sleep
 
 data = [
     { 'id': 1, 'name': 'gol', 'age': 11 },
-    { 'name': 'pedro', 'age': 33 },
+    { 'name': 'pedro', 'age': 32 },
     { 'id': 2, 'name': 'c3', 'age': 4 },
     { 'name': 'carol', 'age': 23 },
     { 'id': 3, 'name': 'fox', 'age': 6 },

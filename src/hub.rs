@@ -116,6 +116,19 @@ impl Hub {
                 println!("{:?}", e);
             });
         });
+
+        self.processors.par_iter().for_each(|(_, entity)| {
+            entity.pos_tasks.iter().for_each(|task| {
+                // // scan all bank
+                // let cmd = self.tasks[task].get_cmd(&str_data);
+
+                // consumer::exec(cmd, |d| {
+                // //     Insert All Stuff
+                // }, |e| {
+                //     println!("Err on task: {:?}", e);
+                // });
+            });
+        });
     }
 
     fn get_processor(&self, entity: &str) -> &ProcessEntity {

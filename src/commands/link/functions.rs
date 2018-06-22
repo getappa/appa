@@ -18,6 +18,7 @@ pub fn exec(file: &str, link_info: &Link) {
             v.collector_tasks.extend(collectors);
             v.sync_tasks.extend(sync_tasks);
             v.async_tasks.extend(async_tasks);
+            v.pos_tasks.extend(flags.pos);
             break;
         }
     }

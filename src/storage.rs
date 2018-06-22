@@ -1,11 +1,13 @@
-use rocksdb::DB;
+use rocksdb::{Options, DB};
 use serde_json::{Value, to_string, from_str};
-// use std:thread;
+use std::result::Result;
+
 pub struct RocksDbStorage {
     pub base: String,
 }
 
 pub struct RocksDbProject {
+    path: String,
     pub conn: DB
 }
 
@@ -16,15 +18,22 @@ impl RocksDbStorage {
 
     pub fn project(&self, project: String) -> RocksDbProject {
         let p = format!("{}/{}", &self.base, project);
-        RocksDbProject::new(DB::open_default(p).unwrap())
+        RocksDbProject::new(p)
     }
 }
 
 impl RocksDbProject {
-    pub fn new(conn: DB) -> RocksDbProject {
-        RocksDbProject{conn: conn}
+    pub fn new(path: String) -> RocksDbProject {
+        let conn = DB::open_default(&path).unwrap();
+        RocksDbProject { conn: conn, path: path }
     }
 
+    pub fn destroy(&self) -> Result<String, String> {
+        match DB::destroy(&Options::default(), &self.path) {
+            Ok() => Ok(self.path),
+            Err() => Err("Not today")
+        }
+    }
 
     pub fn put(&self, uid: &[u8], data: &Value) {
         &self.conn.put(

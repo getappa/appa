@@ -38,7 +38,11 @@ pub struct LinkFlags {
 
     #[structopt(short = "a", long = "async", parse(try_from_str = "parse_key_value"))]
     /// Link an async task
-    pub async: Vec<(String, String)>
+    pub async: Vec<(String, String)>,
+
+    #[structopt(short = "p", long = "pos")]
+    /// Link an pos tasks
+    pub pos: Vec<String>
 }
 
 #[derive(Serialize, Deserialize, StructOpt, Debug)]
