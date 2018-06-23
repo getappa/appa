@@ -13,11 +13,6 @@ use super::{
     consumer
 };
 
-enum IdRef {
-    RefStr(String),
-    RefUid(Uuid)
-}
-
 pub struct Collector {
     pub entries: HashMap<String, String>,
     pub task: String
@@ -70,17 +65,12 @@ impl Hub {
 
                         arr.par_iter().for_each(|item| {
                             let core_id = if processor.id_prop == "" {
-                                IdRef::RefUid(Uuid::new_v4())
+                                Uuid::new_v4().simple().to_string()
                             } else {
-                                IdRef::RefStr(
-                                    item[processor.id_prop.clone()].to_string()
-                                )
+                                item[processor.id_prop.clone()].to_string()
                             };
 
-                            let key = match core_id {
-                                IdRef::RefUid(ref x) => x.as_bytes(),
-                                IdRef::RefStr(ref y) => y.as_bytes()
-                            };
+                            let key = core_id.as_bytes();
 
 
                             let str_item = match to_string(item) {
@@ -118,7 +108,13 @@ impl Hub {
         });
 
         self.processors.par_iter().for_each(|(_, entity)| {
+            println!("Start: {:?}", entity.name.clone());
+            let project = self.storage.project(entity.name.clone());
+            let data = project.scan();
+
+            println!("Number of Data {:?}", data.len());
             entity.pos_tasks.iter().for_each(|task| {
+                println!("Task {:?}", task);
                 // // scan all bank
                 // let cmd = self.tasks[task].get_cmd(&str_data);
 

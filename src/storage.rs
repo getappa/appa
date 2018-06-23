@@ -1,6 +1,7 @@
 use rocksdb::{Options, DB};
 use serde_json::{Value, to_string, from_str};
 use std::result::Result;
+use std::collections::HashMap;
 
 pub struct RocksDbStorage {
     pub base: String,
@@ -28,10 +29,43 @@ impl RocksDbProject {
         RocksDbProject { conn: conn, path: path }
     }
 
+    pub fn scan(&self) -> HashMap<String, String> {
+        let mut data = HashMap::new();
+        let mut iter = self.conn.raw_iterator();
+
+        iter.seek(b"%");
+
+        while iter.valid() {
+            let current = (iter.key(), iter.value());
+
+            match current {
+                (Some(key), Some(val)) => {
+                    data.insert(
+                        String::from_utf8(key).unwrap(),
+                        String::from_utf8(val).unwrap()
+                    );
+                },
+                (Some(_), None) => {
+                    println!("@TODO err handling");
+                },
+                (None, Some(_)) => {
+                    println!("@TODO err handling");
+                },
+                (None, None) => {
+                    println!("@TODO err handling");
+                }
+            }
+
+            iter.next();
+        }
+
+        data
+    }
+
     pub fn destroy(&self) -> Result<String, String> {
         match DB::destroy(&Options::default(), &self.path) {
-            Ok() => Ok(self.path),
-            Err() => Err("Not today")
+            Ok(_) => Ok(self.path.clone()),
+            Err(_) => Err("Not today".to_string())
         }
     }
 
