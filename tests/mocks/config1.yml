@@ -21,7 +21,7 @@ tasks:
     path: 'tests/mocks/map.py'
   - name: 'reduce'
     command: 'python'
-    path: 'tests/mocks/reduc.py'
+    path: 'tests/mocks/reduce.py'
 
 processors:
   - name: 'users'

@@ -2,16 +2,20 @@ import sys
 import json
 
 data = json.loads(sys.argv[1])
+response = {}
 
-for (d in data):
-    d["extra"] = {
-        "age": data["age"],
-        "count": data["count"],
-        "esc": data["esc"]
+for k, v in data.items():
+    val = json.loads(v);
+    val["extra"] = {
+        "age": val["age"],
+        "count": val["count"],
+        "esc": val["esc"]
     }
 
-    del data["age"]
-    del data["count"]
-    del data["esc"]
+    del val["age"]
+    del val["count"]
+    del val["esc"]
 
-sys.stdout.write("{}".format(data))
+    response[k] = val
+
+sys.stdout.write("{}".format(json.dumps(response))

@@ -1,14 +1,14 @@
-use rocksdb::{Options, DB};
+use rocksdb::{Error, DB};
 use serde_json::{Value, to_string, from_str};
 use std::result::Result;
 use std::collections::HashMap;
+// use std::fs::remove_dir_all;
 
 pub struct RocksDbStorage {
     pub base: String,
 }
 
 pub struct RocksDbProject {
-    path: String,
     pub conn: DB
 }
 
@@ -18,15 +18,15 @@ impl RocksDbStorage {
     }
 
     pub fn project(&self, project: String) -> RocksDbProject {
-        let p = format!("{}/{}", &self.base, project);
-        RocksDbProject::new(p)
+        RocksDbProject::new(&self.base, project)
     }
 }
 
 impl RocksDbProject {
-    pub fn new(path: String) -> RocksDbProject {
+    pub fn new(base: &str, project: String) -> RocksDbProject {
+        let path = format!("{}/{}", base, project);
         let conn = DB::open_default(&path).unwrap();
-        RocksDbProject { conn: conn, path: path }
+        RocksDbProject { conn: conn }
     }
 
     pub fn scan(&self) -> HashMap<String, String> {
@@ -62,11 +62,24 @@ impl RocksDbProject {
         data
     }
 
-    pub fn destroy(&self) -> Result<String, String> {
-        match DB::destroy(&Options::default(), &self.path) {
-            Ok(_) => Ok(self.path.clone()),
-            Err(_) => Err("Not today".to_string())
+    pub fn bulk_insert_string(&self, data_string: &str) {
+        let data = from_str::<Value>(data_string).ok().unwrap();
+
+        for (k, v) in data.as_object().unwrap().iter() {
+            self.put_string(
+                k.as_bytes(),
+                v.as_str().unwrap()
+            );
         }
+    }
+
+    pub fn scan_bytes(&self) -> String {
+        let data = json!(self.scan());
+        String::from(to_string(&data).unwrap().as_str())
+    }
+
+    pub fn clean(&self) -> Result<() , Error> {
+       self.conn.delete(b"%")
     }
 
     pub fn put(&self, uid: &[u8], data: &Value) {

@@ -72,7 +72,6 @@ impl Hub {
 
                             let key = core_id.as_bytes();
 
-
                             let str_item = match to_string(item) {
                                 Ok(i) => i,
                                 Err(_) => String::new()
@@ -108,21 +107,25 @@ impl Hub {
         });
 
         self.processors.par_iter().for_each(|(_, entity)| {
-            println!("Start: {:?}", entity.name.clone());
             let project = self.storage.project(entity.name.clone());
-            let data = project.scan();
+            let data = project.scan_bytes();
 
-            println!("Number of Data {:?}", data.len());
+            // println!("{:?} \n {:?}", entity.name, data);
             entity.pos_tasks.iter().for_each(|task| {
-                println!("Task {:?}", task);
-                // // scan all bank
-                // let cmd = self.tasks[task].get_cmd(&str_data);
+                let cmd = self.tasks[task].get_cmd(&data);
 
-                // consumer::exec(cmd, |d| {
-                // //     Insert All Stuff
-                // }, |e| {
-                //     println!("Err on task: {:?}", e);
-                // });
+                consumer::exec(cmd, |d| {
+                    match project.clean() {
+                        Ok(_) => {
+                            project.bulk_insert_string(&d);
+                        },
+                        Err(e) => {
+                            println!("Err on task: {:?}", e);
+                        }
+                    }
+                }, |e| {
+                    println!("Err on task: {:?}", e);
+                });
             });
         });
     }

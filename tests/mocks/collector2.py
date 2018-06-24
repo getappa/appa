@@ -12,7 +12,7 @@ data = [
 
 for v in data:
     json_str = json.dumps([v])
-    tag = 'car' if v.has_key("id") else 'user'
+    tag = 'car' if 'id' in v else 'user'
     sys.stdout.write("!AppaTag({}){}\n".format(tag, json_str))
     sys.stdout.flush()
     sleep(1)
