@@ -110,19 +110,12 @@ impl Hub {
             let project = self.storage.project(entity.name.clone());
             let data = project.scan_bytes();
 
-            // println!("{:?} \n {:?}", entity.name, data);
             entity.pos_tasks.iter().for_each(|task| {
                 let cmd = self.tasks[task].get_cmd(&data);
 
                 consumer::exec(cmd, |d| {
-                    match project.clean() {
-                        Ok(_) => {
-                            project.bulk_insert_string(&d);
-                        },
-                        Err(e) => {
-                            println!("Err on task: {:?}", e);
-                        }
-                    }
+                    project.clean();
+                    project.bulk_insert_string(&d);
                 }, |e| {
                     println!("Err on task: {:?}", e);
                 });

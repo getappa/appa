@@ -1,8 +1,6 @@
-use rocksdb::{Error, DB};
+use rocksdb::DB;
 use serde_json::{Value, to_string, from_str};
-use std::result::Result;
 use std::collections::HashMap;
-// use std::fs::remove_dir_all;
 
 pub struct RocksDbStorage {
     pub base: String,
@@ -62,24 +60,59 @@ impl RocksDbProject {
         data
     }
 
-    pub fn bulk_insert_string(&self, data_string: &str) {
-        let data = from_str::<Value>(data_string).ok().unwrap();
+pub fn bulk_insert_string(&self, data_string: &str) {
+    let data = from_str::<Value>(data_string).ok().unwrap();
 
-        for (k, v) in data.as_object().unwrap().iter() {
-            self.put_string(
-                k.as_bytes(),
-                v.as_str().unwrap()
-            );
+    for (k, v) in data.as_object().unwrap().iter() {
+        if v.is_object() {
+            match to_string(&v) {
+                Ok(val) => {
+                    self.put_string(k.as_bytes(), &val);
+                },
+                Err(e) => {
+                    println!("{:?}", e);
+                }
+            }
+        } else {
+            match v.as_str() {
+                Some(val) => {
+                    self.put_string(k.as_bytes(), val);
+                },
+                None => {
+                    println!("Problem: {:?} {:?}", k, v)
+                }
+            }
         }
     }
+}
 
     pub fn scan_bytes(&self) -> String {
         let data = json!(self.scan());
         String::from(to_string(&data).unwrap().as_str())
     }
 
-    pub fn clean(&self) -> Result<() , Error> {
-       self.conn.delete(b"%")
+    pub fn clean(&self) {
+        let mut iter = self.conn.raw_iterator();
+
+        iter.seek(b"%");
+
+        while iter.valid() {
+            match iter.key() {
+                Some(id) => match self.conn.delete(&id) {
+                    Ok(_) => {
+                        // println!("Deleted with success {:?}", id);
+                    },
+                    Err(e) => {
+                        println!("Some err {:?}", e);
+                    }
+                },
+                None => {
+                    println!("Trigger error");
+                }
+            }
+
+            iter.next();
+        }
     }
 
     pub fn put(&self, uid: &[u8], data: &Value) {

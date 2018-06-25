@@ -18,4 +18,4 @@ for k, v in data.items():
 
     response[k] = val
 
-sys.stdout.write("{}".format(json.dumps(response))
+sys.stdout.write("{}".format(json.dumps(response)))
